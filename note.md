@@ -30,5 +30,3 @@ addRequestHandler((short) 6000, CaoThapModule.class);
 addRequestHandler((short) 7000, PokeGoModule.class);
 // addRequestHandler((short) 8000, XoSoModule.class);
 ```
-
-Nên nói ngắn gọn: **có source nhưng chưa active** = code tồn tại, nhưng chưa được bật trong server runtime.
