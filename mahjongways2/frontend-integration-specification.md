@@ -1,251 +1,290 @@
 # Mahjong2 — Frontend Integration Specification
 
-## (Final Frontend Design)
+## Final Flow: Reuse Socket Cũ, Mở Rộng Result Payload
 
 ---
 
-# 1. OVERVIEW
+# 1. Mục tiêu
 
-## Game Type
+Mahjong2 frontend **không cần tích hợp lại socket flow mới**.
+
+Game mới sẽ:
 
 ```text
-Mahjong2
+reuse socket architecture cũ
+reuse numeric command convention cũ
+reuse subscribe / play / autoplay flow cũ
+```
+
+Chỉ mở rộng phần:
+
+```text
+RESULT payload
+cascadeSteps
+goldenTransforms
+freeSpin state
 ```
 
 ---
 
-## Core Design
+# 2. Game overview
 
-| Thành phần   | Thiết kế         |
-| ------------ | ---------------- |
-| Board        | 4 rows × 5 reels |
-| Win System   | Ways System      |
-| Payline      | Không sử dụng    |
-| Socket Style | numeric command  |
-| Highlight    | positions[]      |
-| Animation    | ways-centric     |
-| Pot Update   | realtime         |
-| Auto Play    | supported        |
+Mahjong2 là game:
+
+```text
+5 reels
+layout 4-5-5-5-4
+2000 ways
+có cascade
+có multiplier theo cascade
+có Golden Symbol
+có Golden → Wild transform
+có Free Spin
+```
+
+Frontend không được giả định game là:
+
+```text
+4x5 đều
+1024 ways
+1 spin = 1 result đơn giản
+```
 
 ---
 
-# 2. FRONTEND FLOW
+# 3. Command convention
+
+Dự án cũ đang dùng **numeric command**.
+
+Mahjong2 nên map theo convention hiện tại, ví dụ theo block Avengers:
+
+| Action          | Avengers hiện tại | Mahjong2 đề xuất |
+| --------------- | ----------------: | ---------------: |
+| PLAY            |              4001 |             4101 |
+| UPDATE_POT      |              4002 |             4102 |
+| SUBSCRIBE       |              4003 |             4103 |
+| UNSUBSCRIBE     |              4004 |             4104 |
+| CHANGE_ROOM     |              4005 |             4105 |
+| AUTO_PLAY       |              4006 |             4106 |
+| STOP_AUTO_PLAY  |              4007 |             4107 |
+| FORCE_STOP_AUTO |              4008 |             4108 |
+| INFO            |              4009 |             4109 |
+| BIG_WIN         |              4010 |             4110 |
+| TOTAL_FREE_SPIN |              4011 |             4111 |
+| FREE_DAILY      |              4012 |             4112 |
+| MINIMIZE        |              4013 |             4113 |
+| MINIMIZE_RESULT |              4014 |             4114 |
+
+> ID `4101–4114` là block đề xuất theo convention hiện tại. Nếu backend đã cấp ID khác, frontend dùng ID backend cấp.
+
+---
+
+# 4. Command list cho Mahjong2
+
+## Client → Server
+
+| Command                 | ID đề xuất | Mục đích             |
+| ----------------------- | ---------: | -------------------- |
+| PLAY_MAHJONG2           |       4101 | quay 1 lượt          |
+| SUBSCRIBE_MAHJONG2      |       4103 | vào game / join room |
+| UNSUBSCRIBE_MAHJONG2    |       4104 | thoát game           |
+| CHANGE_ROOM_MAHJONG2    |       4105 | đổi room cược        |
+| AUTO_PLAY_MAHJONG2      |       4106 | bật auto play        |
+| STOP_AUTO_PLAY_MAHJONG2 |       4107 | dừng auto play       |
+| MINIMIZE_MAHJONG2       |       4113 | minimize game        |
+
+## Server → Client
+
+| Command                  | ID đề xuất | Mục đích                 |
+| ------------------------ | ---------: | ------------------------ |
+| RESULT_MAHJONG2          |       4101 | trả kết quả spin         |
+| UPDATE_POT_MAHJONG2      |       4102 | cập nhật jackpot pot     |
+| FORCE_STOP_AUTO_MAHJONG2 |       4108 | server bắt dừng auto     |
+| INFO_MAHJONG2            |       4109 | trả thông tin room/game  |
+| BIG_WIN_MAHJONG2         |       4110 | broadcast big win        |
+| TOTAL_FREE_SPIN_MAHJONG2 |       4111 | sync tổng free spin      |
+| MINIMIZE_RESULT_MAHJONG2 |       4114 | trả kết quả khi minimize |
+
+---
+
+# 5. Nguyên tắc quan trọng
+
+Không cần tạo command riêng cho:
+
+```text
+CASCADE_STEP
+GOLDEN_TRANSFORM
+FREE_SPIN_STATE
+```
+
+Vì Mahjong2 nên trả toàn bộ dữ liệu animation trong **một RESULT payload**.
+
+Lý do:
+
+```text
+giảm socket spam
+tránh desync animation
+frontend tự chạy animation queue
+dễ support mobile / slow network
+```
+
+---
+
+# 6. Flow tổng thể
 
 ```text
 LOGIN
 ↓
 SUBSCRIBE_MAHJONG2
 ↓
-CHANGE_ROOM_MAHJONG2
+INFO_MAHJONG2
+↓
+CHANGE_ROOM_MAHJONG2 nếu cần
 ↓
 PLAY_MAHJONG2
 ↓
 RESULT_MAHJONG2
 ↓
-UPDATE_POT_MAHJONG2
+UPDATE_POT_MAHJONG2 nếu pot đổi
 ↓
-BIG_WIN_MAHJONG2
+BIG_WIN_MAHJONG2 nếu đủ điều kiện
 ↓
-AUTO_PLAY_MAHJONG2
+AUTO_PLAY_MAHJONG2 nếu bật auto
 ↓
-STOP_PLAY_MAHJONG2
+STOP_AUTO_PLAY_MAHJONG2 hoặc FORCE_STOP_AUTO_MAHJONG2
 ↓
 UNSUBSCRIBE_MAHJONG2
-↓
-DISCONNECT
 ```
 
 ---
 
-# 3. SOCKET COMMANDS
+# 7. Subscribe flow
 
-## Client → Server
-
-| Command              | ID   | Purpose     |
-| -------------------- | ---- | ----------- |
-| SUBSCRIBE_MAHJONG2   | 6000 | join room   |
-| CHANGE_ROOM_MAHJONG2 | 6001 | change room |
-| PLAY_MAHJONG2        | 6002 | spin        |
-| AUTO_PLAY_MAHJONG2   | 6003 | auto spin   |
-| STOP_PLAY_MAHJONG2   | 6004 | stop auto   |
-| UNSUBSCRIBE_MAHJONG2 | 6005 | leave room  |
-
----
-
-## Server → Client
-
-| Command                  | ID   | Purpose            |
-| ------------------------ | ---- | ------------------ |
-| RESULT_MAHJONG2          | 6050 | spin result        |
-| UPDATE_POT_MAHJONG2      | 6051 | update jackpot pot |
-| BIG_WIN_MAHJONG2         | 6052 | broadcast big win  |
-| FORCE_STOP_PLAY_MAHJONG2 | 6053 | stop auto play     |
-
----
-
-# 4. LOGIN FLOW
-
-## Frontend → Server
+## Frontend gửi
 
 ```json
 {
-  "cmd": 1,
-  "token": "USER_TOKEN"
-}
-```
-
----
-
-## Server → Frontend
-
-```json
-{
-  "cmd": 1,
-
-  "user": {
-    "userId": 1001,
-    "nickname": "playerA",
-    "balance": 1000000
-  }
-}
-```
-
----
-
-# 5. SUBSCRIBE ROOM
-
-## Frontend → Server
-
-```json
-{
-  "cmd": 6000,
+  "cmd": 4103,
   "roomId": 1
 }
 ```
 
----
-
-## Server → Frontend
+## Server trả
 
 ```json
 {
-  "cmd": 6000,
-
+  "cmd": 4109,
   "room": {
     "roomId": 1,
-    "betValue": 1000,
+    "betSize": 2.5,
+    "betLevel": 9,
+    "baseBet": 20,
+    "totalBet": 450,
     "pot": 1200000
   },
-
   "playerState": {
     "balance": 1000000,
-    "remainFreeSpin": 0
+    "mode": "BASE",
+    "remainingFreeSpin": 0
   }
 }
 ```
 
+Frontend cần:
+
+```text
+set currentRoom
+set balance
+set pot
+set mode
+render default reels nếu backend trả
+```
+
 ---
 
-# 6. CHANGE ROOM
+# 8. Change room flow
 
-## Frontend → Server
+## Frontend gửi
 
 ```json
 {
-  "cmd": 6001,
+  "cmd": 4105,
   "roomId": 2
 }
 ```
 
----
-
-## Server → Frontend
+## Server trả
 
 ```json
 {
-  "cmd": 6001,
-
+  "cmd": 4109,
   "room": {
     "roomId": 2,
-    "betValue": 5000,
+    "betSize": 5,
+    "betLevel": 9,
+    "baseBet": 20,
+    "totalBet": 900,
     "pot": 5000000
+  },
+  "playerState": {
+    "balance": 1000000,
+    "mode": "BASE",
+    "remainingFreeSpin": 0
   }
 }
 ```
 
 ---
 
-# 7. PLAY REQUEST
+# 9. Play request
 
-## Frontend → Server
+Mahjong2 dùng 3 thành phần cược:
+
+```text
+totalBet = betSize × betLevel × baseBet
+```
+
+## Frontend gửi
 
 ```json
 {
-  "cmd": 6002,
-
-  "betLevel": 20
+  "cmd": 4101,
+  "betSize": 2.5,
+  "betLevel": 9,
+  "baseBet": 20,
+  "turbo": false
 }
 ```
 
 ---
 
-# 8. RESULT RESPONSE
-
-## Server → Frontend
+# 10. Result payload — cấu trúc chuẩn
 
 ```json
 {
-  "cmd": 6050,
-
+  "cmd": 4101,
   "spinId": "SPIN_10001",
 
-  "matrix": [
-    ["ITEM_1","ITEM_2","ITEM_3","ITEM_4","W"],
-    ["ITEM_1","ITEM_1","ITEM_3","SC","ITEM_2"],
-    ["ITEM_5","ITEM_1","W","ITEM_4","ITEM_2"],
-    ["ITEM_1","ITEM_2","ITEM_3","BONUS","ITEM_1"]
-  ],
+  "reels": [],
 
-  "wins": [
-    {
-      "symbol": "ITEM_1",
+  "cascadeSteps": [],
 
-      "matchCount": 4,
-
-      "ways": 8,
-
-      "multiplier": 1,
-
-      "winAmount": 3200,
-
-      "positions": [
-        [0,0],
-        [1,0],
-        [1,1],
-        [2,1],
-        [0,2],
-        [3,2]
-      ]
-    }
-  ],
-
-  "totalWin": 3200,
-
-  "balance": 983200,
+  "totalWin": 0,
+  "balance": 0,
 
   "bet": {
-    "betValue": 1000,
-    "betLevel": 20,
-    "totalBet": 20000
+    "betSize": 2.5,
+    "betLevel": 9,
+    "baseBet": 20,
+    "totalBet": 450
   },
 
-  "features": {
-    "freeSpinTriggered": false,
-    "freeSpinCount": 0,
-
-    "bonusTriggered": false,
-
-    "jackpotTriggered": false
+  "freeSpin": {
+    "triggered": false,
+    "awarded": 0,
+    "remaining": 0,
+    "retriggered": false,
+    "scatterCount": 0
   },
 
   "jackpot": {
@@ -255,322 +294,391 @@ DISCONNECT
   },
 
   "state": {
+    "mode": "BASE",
     "pot": 1200000,
-
-    "remainFreeSpin": 0,
-
-    "bigWin": false
+    "bigWin": false,
+    "turbo": false
   }
 }
 ```
 
 ---
 
-# 9. MATRIX DESIGN
+# 11. Reels format
 
-## Board Size
-
-```text
-4 rows × 5 reels
-```
-
----
-
-## Frontend Matrix Format
+Vì layout là `4-5-5-5-4`, frontend nhận dạng:
 
 ```text
-[row][column]
+reels[reelIndex][rowIndex]
 ```
 
----
-
-## Visual
-
-```text
-[r0,c0] [r0,c1] [r0,c2] [r0,c3] [r0,c4]
-[r1,c0] [r1,c1] [r1,c2] [r1,c3] [r1,c4]
-[r2,c0] [r2,c1] [r2,c2] [r2,c3] [r2,c4]
-[r3,c0] [r3,c1] [r3,c2] [r3,c3] [r3,c4]
-```
-
----
-
-# 10. SYMBOL SPECIFICATION
-
-## Special Symbols
-
-| Symbol  | Code  | Behavior              |
-| ------- | ----- | --------------------- |
-| Wild    | W     | replace normal symbol |
-| Scatter | SC    | trigger free spin     |
-| Bonus   | BONUS | trigger bonus         |
-| Jackpot | JP    | trigger jackpot       |
-
----
-
-## Normal Symbols
-
-| Symbol | Code   |
-| ------ | ------ |
-| ITEM_1 | ITEM_1 |
-| ITEM_2 | ITEM_2 |
-| ITEM_3 | ITEM_3 |
-| ITEM_4 | ITEM_4 |
-| ITEM_5 | ITEM_5 |
-| ITEM_6 | ITEM_6 |
-| ITEM_7 | ITEM_7 |
-
----
-
-# 11. SYMBOL ASSET MAPPING
-
-| Symbol | Asset       |
-| ------ | ----------- |
-| ITEM_1 | item_1.png  |
-| ITEM_2 | item_2.png  |
-| ITEM_3 | item_3.png  |
-| W      | wild.png    |
-| SC     | scatter.png |
-| BONUS  | bonus.png   |
-| JP     | jackpot.png |
-
----
-
-# 12. WAYS SYSTEM
-
-Mahjong2 không dùng paylines.
-
-Mahjong2 dùng:
-
-```text
-ways system
-```
-
----
-
-# 13. WIN CONDITION
-
-## Rule
-
-```text
-ít nhất 3 reel liên tiếp
-có symbol giống nhau
-```
-
----
-
-# 14. WAYS RESPONSE
-
-## Frontend cần render:
-
-| Field      | Meaning             |
-| ---------- | ------------------- |
-| symbol     | symbol thắng        |
-| matchCount | số reel match       |
-| ways       | số tổ hợp thắng     |
-| positions  | highlight positions |
-| multiplier | multiplier          |
-| winAmount  | payout              |
-
----
-
-# 15. POSITIONS FORMAT
-
-## Example
+## Ví dụ
 
 ```json
-[
-  [0,0],
-  [1,0],
-  [1,1]
+"reels": [
+  [
+    { "symbol": "ITEM_1", "golden": false },
+    { "symbol": "ITEM_2", "golden": false },
+    { "symbol": "SCATTER", "golden": false },
+    { "symbol": "ITEM_3", "golden": false }
+  ],
+  [
+    { "symbol": "ITEM_1", "golden": true },
+    { "symbol": "WILD", "golden": false },
+    { "symbol": "ITEM_2", "golden": false },
+    { "symbol": "ITEM_4", "golden": true },
+    { "symbol": "ITEM_5", "golden": false }
+  ],
+  [
+    { "symbol": "ITEM_1", "golden": false },
+    { "symbol": "ITEM_3", "golden": true },
+    { "symbol": "ITEM_4", "golden": false },
+    { "symbol": "ITEM_5", "golden": false },
+    { "symbol": "ITEM_6", "golden": false }
+  ],
+  [
+    { "symbol": "ITEM_1", "golden": false },
+    { "symbol": "ITEM_2", "golden": true },
+    { "symbol": "ITEM_3", "golden": false },
+    { "symbol": "ITEM_4", "golden": false },
+    { "symbol": "ITEM_5", "golden": false }
+  ],
+  [
+    { "symbol": "ITEM_2", "golden": false },
+    { "symbol": "ITEM_3", "golden": false },
+    { "symbol": "ITEM_4", "golden": false },
+    { "symbol": "ITEM_5", "golden": false }
+  ]
 ]
 ```
 
 ---
 
-# 16. POSITIONS RULE
+# 12. Symbol expectation
+
+| Symbol  | Code           | FE behavior                              |
+| ------- | -------------- | ---------------------------------------- |
+| Wild    | `WILD`         | render wild, thay symbol thường          |
+| Scatter | `SCATTER`      | render scatter, trigger free spin        |
+| Normal  | `ITEM_1`…      | render symbol thường                     |
+| Golden  | `golden: true` | render golden overlay trên symbol thường |
+
+Frontend không nên tự giả định có:
+
+```text
+BONUS
+JP symbol trên reels
+```
+
+trừ khi backend trả về trong reels.
+
+---
+
+# 13. Cascade steps
+
+Một spin có thể có nhiều cascade.
+
+Frontend không nên render ngay kết quả cuối, mà phải chạy theo từng step.
+
+## Format
+
+```json
+"cascadeSteps": [
+  {
+    "step": 1,
+    "mode": "BASE",
+    "multiplier": 1,
+    "reelsBefore": [],
+    "wins": [],
+    "removedPositions": [],
+    "goldenTransforms": [],
+    "reelsAfterDrop": [],
+    "stepWin": 1200
+  },
+  {
+    "step": 2,
+    "mode": "BASE",
+    "multiplier": 2,
+    "reelsBefore": [],
+    "wins": [],
+    "removedPositions": [],
+    "goldenTransforms": [],
+    "reelsAfterDrop": [],
+    "stepWin": 3600
+  }
+]
+```
+
+---
+
+# 14. Win object
+
+```json
+{
+  "symbol": "ITEM_1",
+  "matchedReels": 4,
+  "ways": 8,
+  "payRate": 0.2,
+  "multiplier": 2,
+  "winAmount": 3200,
+  "positions": [
+    { "reel": 0, "row": 0 },
+    { "reel": 1, "row": 0 },
+    { "reel": 1, "row": 3 },
+    { "reel": 2, "row": 1 }
+  ]
+}
+```
 
 Frontend dùng:
 
 ```text
-positions[]
-```
-
-để:
-
-```text
-- highlight symbol thắng
-- play win animation
-- render ways effect
+wins[].positions để highlight symbol thắng
 ```
 
 ---
 
-# 17. MATCH COUNT
-
-## Example
+# 15. Removed positions
 
 ```json
-"matchCount": 4
+"removedPositions": [
+  { "reel": 0, "row": 0 },
+  { "reel": 1, "row": 0 },
+  { "reel": 1, "row": 3 },
+  { "reel": 2, "row": 1 }
+]
 ```
 
----
-
-## Meaning
+Frontend dùng để:
 
 ```text
-match từ reel 1 → reel 4
+explode symbol thắng
+xóa symbol
+chạy animation rơi
 ```
 
 ---
 
-# 18. FREE SPIN
+# 16. Golden transforms
 
-## Trigger
+```json
+"goldenTransforms": [
+  {
+    "from": {
+      "reel": 2,
+      "row": 1,
+      "symbol": "ITEM_3",
+      "golden": true
+    },
+    "to": {
+      "reel": 2,
+      "row": 1,
+      "symbol": "WILD",
+      "golden": false
+    }
+  }
+]
+```
+
+Frontend dùng để animate:
 
 ```text
-3 SCATTER anywhere
+Golden Symbol → Wild
 ```
 
 ---
+
+# 17. Multiplier
+
+## Base game
+
+| Cascade step | Multiplier |
+| ------------ | ---------: |
+| 1            |         x1 |
+| 2            |         x2 |
+| 3            |         x3 |
+| 4+           |         x5 |
+
+## Free spin
+
+| Cascade step | Multiplier |
+| ------------ | ---------: |
+| 1            |         x2 |
+| 2            |         x4 |
+| 3            |         x6 |
+| 4+           |        x10 |
+
+Frontend lấy multiplier từ:
+
+```text
+cascadeSteps[].multiplier
+```
+
+không tự tính.
+
+---
+
+# 18. Free spin state
+
+## Trigger rule
+
+```text
+3 Scatter = 10 free spins
+mỗi Scatter thêm = +2 spins
+```
 
 ## Response
 
 ```json
-"features": {
-  "freeSpinTriggered": true,
-  "freeSpinCount": 10
-}
-```
-
----
-
-# 19. BONUS GAME
-
-## Trigger
-
-```text
-3 BONUS anywhere
-```
-
----
-
-## Response
-
-```json
-"features": {
-  "bonusTriggered": true
-}
-```
-
----
-
-# 20. JACKPOT
-
-## Response
-
-```json
-"jackpot": {
+"freeSpin": {
   "triggered": true,
-  "type": "NORMAL",
-  "amount": 5000000
+  "awarded": 10,
+  "remaining": 10,
+  "retriggered": false,
+  "scatterCount": 3
 }
+```
+
+Nếu đang free spin:
+
+```json
+"state": {
+  "mode": "FREE_SPIN",
+  "pot": 1200000,
+  "bigWin": false,
+  "turbo": false
+}
+```
+
+Frontend cần hiển thị:
+
+```text
+free spin intro
+remaining free spin
+free spin multiplier table/effect
+retrigger nếu có
 ```
 
 ---
 
-# 21. UPDATE POT
+# 19. Update pot
 
-## Server Broadcast
+## Server broadcast
 
 ```json
 {
-  "cmd": 6051,
-
+  "cmd": 4102,
   "roomId": 1,
-
   "pot": 1300000
 }
 ```
 
+Frontend update jackpot pot realtime.
+
 ---
 
-# 22. BIG WIN
+# 20. Big win
 
-## Server Broadcast
+## Server broadcast
 
 ```json
 {
-  "cmd": 6052,
-
+  "cmd": 4110,
   "nickname": "playerA",
-
   "amount": 5000000,
-
   "roomId": 1
 }
 ```
 
+Frontend render big win ticker / popup theo UI hiện tại.
+
 ---
 
-# 23. AUTO PLAY
+# 21. Auto play
 
-## Frontend → Server
+## Frontend gửi
 
 ```json
 {
-  "cmd": 6003,
-
-  "betLevel": 20
+  "cmd": 4106,
+  "betSize": 2.5,
+  "betLevel": 9,
+  "baseBet": 20,
+  "rounds": 100,
+  "turbo": false
 }
 ```
 
----
+Server trả liên tục các payload:
 
-# 24. STOP AUTO PLAY
+```text
+RESULT_MAHJONG2
+RESULT_MAHJONG2
+RESULT_MAHJONG2
+...
+```
 
-## Frontend → Server
+## Stop auto
 
 ```json
 {
-  "cmd": 6004
+  "cmd": 4107
 }
 ```
 
----
-
-# 25. FORCE STOP AUTO PLAY
-
-## Server → Frontend
+## Force stop từ server
 
 ```json
 {
-  "cmd": 6053,
-
+  "cmd": 4108,
   "reason": "NOT_ENOUGH_MONEY"
 }
 ```
 
 ---
 
-# 26. ERROR RESPONSE
+# 22. Minimize flow
+
+Reuse flow cũ.
+
+## Frontend gửi
 
 ```json
 {
-  "cmd": -1,
+  "cmd": 4113
+}
+```
 
-  "errorCode": 1001,
+## Server trả
 
-  "message": "NOT_ENOUGH_MONEY"
+```json
+{
+  "cmd": 4114,
+  "result": {
+    "spinId": "SPIN_10001",
+    "totalWin": 1200,
+    "balance": 1001200,
+    "freeSpin": {
+      "remaining": 0
+    }
+  }
 }
 ```
 
 ---
 
-# 27. ERROR CODES
+# 23. Error response
+
+```json
+{
+  "cmd": -1,
+  "errorCode": 1001,
+  "message": "NOT_ENOUGH_MONEY"
+}
+```
 
 | Code | Meaning          |
-| ---- | ---------------- |
+| ---: | ---------------- |
 | 1001 | NOT_ENOUGH_MONEY |
 | 1002 | INVALID_ROOM     |
 | 1003 | INVALID_BET      |
@@ -579,63 +687,104 @@ match từ reel 1 → reel 4
 
 ---
 
-# 28. FRONTEND RENDER FLOW
+# 24. Frontend render flow
 
 ```text
 Receive RESULT_MAHJONG2
 ↓
-Render 4x5 matrix
+Render initial reels layout 4-5-5-5-4
 ↓
-Loop wins[]
+For each cascadeStep:
+    render reelsBefore
+    highlight wins[].positions
+    show multiplier
+    show stepWin
+    explode removedPositions
+    animate goldenTransforms
+    animate drop to reelsAfterDrop
 ↓
-Highlight positions
-↓
-Play ways animation
-↓
-Show win amount
+Update totalWin
 ↓
 Update balance
 ↓
-Update jackpot pot
+Update pot
 ↓
-Check feature trigger
+If freeSpin.triggered:
+    show free spin intro
 ↓
-Play free spin / bonus / jackpot animation
+If state.mode = FREE_SPIN:
+    show remaining free spins
 ↓
-Ready next spin
+If jackpot.triggered:
+    play jackpot effect
+↓
+Ready next spin / next autoplay spin
 ```
 
 ---
 
-# 29. FRONTEND STATE MANAGEMENT
+# 25. Frontend state management
 
-Frontend nên quản lý:
-
-| State          | Purpose          |
-| -------------- | ---------------- |
-| currentRoom    | room hiện tại    |
-| balance        | wallet           |
-| pot            | jackpot pot      |
-| autoPlay       | auto play state  |
-| remainFreeSpin | free spin count  |
-| currentMatrix  | current board    |
-| wins           | animation render |
-| jackpotState   | jackpot effect   |
+| State             | Purpose                         |
+| ----------------- | ------------------------------- |
+| currentRoom       | room hiện tại                   |
+| reels             | board hiện tại                  |
+| cascadeSteps      | animation queue                 |
+| balance           | số dư user                      |
+| pot               | jackpot pot                     |
+| mode              | BASE / FREE_SPIN                |
+| remainingFreeSpin | free spin còn lại               |
+| currentMultiplier | multiplier của cascade hiện tại |
+| totalWin          | tổng thắng                      |
+| autoPlay          | trạng thái auto                 |
+| turbo             | trạng thái quay nhanh           |
 
 ---
 
-# 30. FINAL FRONTEND DESIGN
+# 26. Những thứ frontend không được tự giả định
 
-Mahjong2 frontend final structure:
+Frontend không nên tự giả định:
 
-| Thành phần   | Final Design                |
-| ------------ | --------------------------- |
-| Board        | 4x5                         |
-| Win System   | Ways                        |
-| Highlight    | positions[]                 |
-| Socket       | numeric command             |
-| Animation    | ways-centric                |
-| Matrix       | symbol code                 |
-| Feature Flow | free spin / bonus / jackpot |
-| Pot Update   | realtime                    |
-| Auto Play    | supported                   |
+```text
+board là 4x5 đều
+ways là 1024
+một spin chỉ có một animation win
+multiplier luôn x1
+free spin luôn đúng 10 mà không cộng thêm
+Golden chỉ là asset, không có transform
+có BONUS/JP symbol trên reel
+```
+
+Frontend phải đọc từ response:
+
+```text
+reels
+cascadeSteps
+goldenTransforms
+freeSpin
+state.mode
+multiplier
+removedPositions
+```
+
+---
+
+# 27. Kết luận
+
+Mahjong2 frontend nên:
+
+```text
+reuse socket flow cũ
+reuse numeric command convention cũ
+reuse subscribe/play/autoplay flow cũ
+```
+
+Chỉ cần mở rộng:
+
+```text
+RESULT payload
+cascadeSteps
+goldenTransforms
+freeSpin state
+dynamic reels 4-5-5-5-4
+```

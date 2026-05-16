@@ -1,210 +1,121 @@
-# Mahjong2 — Backend Technical Specification
+# Mahjong2 — Jackpot / Economy System Specification
 
-## (Final Backend Internal Design)
+## (Full Internal Backend Design)
 
 ---
 
 # 1. OVERVIEW
 
-## Game Type
+Mahjong2 không tự xây economy riêng.
 
-```text
-Mahjong2
+Mahjong2 reuse toàn bộ hệ thống:
+
+```text id="mjlwmu"
+wallet
+fund
+pot
+transaction
+jackpot
 ```
 
----
-
-## Core Design
-
-| Thành phần     | Thiết kế         |
-| -------------- | ---------------- |
-| Board          | 4 rows × 5 reels |
-| Win System     | Ways System      |
-| Payline        | Không sử dụng    |
-| Bet Input      | betLevel         |
-| Command Style  | numeric command  |
-| Random System  | weighted random  |
-| Wallet Flow    | reuse system cũ  |
-| Pot/Fund Flow  | reuse system cũ  |
-| Jackpot Flow   | reuse system cũ  |
-| Auto Play Flow | reuse system cũ  |
+từ SlotMachine system cũ.
 
 ---
 
-# 2. CORE FLOW
+# 2. CORE ECONOMY FLOW
 
-```text
-PLAY_MAHJONG2
+## Full Flow
+
+```text id="xxdqdt"
+player spin
 ↓
-validate balance
+deduct totalBet
 ↓
-calculate totalBet
+split bet
 ↓
-deduct bet
+update pot
 ↓
-split fee / pot / fund
+update fund
 ↓
-update pot / fund
+calculate win
 ↓
-generate 4x5 board
+calculate jackpot
 ↓
-calculate ways win
-↓
-check scatter / bonus / jackpot symbol
-↓
-check jackpot condition
-↓
-calculate totalWin
-↓
-safety check fund
+safety check
 ↓
 credit reward
 ↓
-reset pot if jackpot
-↓
 save transaction
 ↓
-save spin history
-↓
-return RESULT_MAHJONG2
+save history
 ```
 
 ---
 
-# 3. PROJECT STRUCTURE
+# 3. WALLET SYSTEM
 
-## Keep
+## Purpose
 
-```text
-Mahjong2Module.java
-Mahjong2Room.java
-Mahjong2Utils.java
-Mahjong2Item.java
-Mahjong2PayTable.java
-Mahjong2WaysEngine.java
-ResultMahjong2Msg.java
+Quản lý:
+
+```text id="a4l7eo"
+player balance
 ```
 
 ---
 
-## Remove
+# 4. WALLET FLOW
 
-```text
-Mahjong2Lines.java
-```
+## Before Spin
 
-Mahjong2 không dùng paylines.
-
----
-
-# 4. BOARD DESIGN
-
-## Board Size
-
-```text
-4 rows × 5 reels
+```text id="qugjlwm"
+validate balance >= totalBet
 ```
 
 ---
 
-## Internal Structure
+## Deduct
 
-Backend dùng:
-
-```text
-reels[reelIndex][rowIndex]
+```text id="s7e9v4"
+balance -= totalBet
 ```
 
 ---
 
-## Visual
+## Credit
 
-```text
-[r0,c0] [r0,c1] [r0,c2] [r0,c3] [r0,c4]
-[r1,c0] [r1,c1] [r1,c2] [r1,c3] [r1,c4]
-[r2,c0] [r2,c1] [r2,c2] [r2,c3] [r2,c4]
-[r3,c0] [r3,c1] [r3,c2] [r3,c3] [r3,c4]
+```text id="9wnjlwm"
+balance += totalWin
 ```
 
 ---
 
-# 5. SYMBOL DESIGN
+# 5. BET STRUCTURE
 
-## Special Symbols
+## Real Formula
 
-| Symbol  | Code  | Behavior              |
-| ------- | ----- | --------------------- |
-| Wild    | W     | replace normal symbol |
-| Scatter | SC    | trigger free spin     |
-| Bonus   | BONUS | trigger bonus         |
-| Jackpot | JP    | trigger jackpot       |
-
----
-
-## Normal Symbols
-
-| Symbol | Code   |
-| ------ | ------ |
-| ITEM_1 | ITEM_1 |
-| ITEM_2 | ITEM_2 |
-| ITEM_3 | ITEM_3 |
-| ITEM_4 | ITEM_4 |
-| ITEM_5 | ITEM_5 |
-| ITEM_6 | ITEM_6 |
-| ITEM_7 | ITEM_7 |
-
----
-
-# 6. SYMBOL ENUM
-
-```java
-public enum Mahjong2Symbol {
-
-    NONE(-1, "NONE", false, false, false, false, false),
-
-    SCATTER(0, "SCATTER", true, false, false, false, false),
-    BONUS(1, "BONUS", false, true, false, false, false),
-    WILD(2, "WILD", false, false, true, false, false),
-    JACKPOT(3, "JACKPOT", false, false, false, true, false),
-
-    ITEM_1(4, "ITEM_1", false, false, false, false, true),
-    ITEM_2(5, "ITEM_2", false, false, false, false, true),
-    ITEM_3(6, "ITEM_3", false, false, false, false, true),
-    ITEM_4(7, "ITEM_4", false, false, false, false, true),
-    ITEM_5(8, "ITEM_5", false, false, false, false, true),
-    ITEM_6(9, "ITEM_6", false, false, false, false, true),
-    ITEM_7(10, "ITEM_7", false, false, false, false, true);
-}
+```text id="x1t6j5"
+totalBet =
+betSize ×
+betLevel ×
+baseBet
 ```
 
 ---
 
-# 7. BET SYSTEM
+## Example
 
-## Frontend Request
-
-```json
-{
-  "cmd": 6002,
-  "betLevel": 20
-}
+```text id="cfrjlwm"
+2.50 × 9 × 20 = 450
 ```
 
 ---
+
+# 6. BET SPLIT SYSTEM
 
 ## Formula
 
-```text
-totalBet = betValue × betLevel
-```
-
----
-
-# 8. ECONOMY FLOW
-
-## Bet Split
-
-```text
+```text id="66m1y0"
 fee = totalBet × 2%
 moneyToPot = totalBet × 1%
 moneyToFund = totalBet × 97%
@@ -212,437 +123,574 @@ moneyToFund = totalBet × 97%
 
 ---
 
-## Update
+# 7. PURPOSE OF EACH PART
 
-```text
+| Part        | Purpose              |
+| ----------- | -------------------- |
+| fee         | operator revenue     |
+| moneyToPot  | jackpot accumulation |
+| moneyToFund | payout reserve       |
+
+---
+
+# 8. JACKPOT POT SYSTEM
+
+## Purpose
+
+```text id="tjlwm0"
+jackpot prize pool
+```
+
+---
+
+# 9. POT UPDATE FLOW
+
+## Formula
+
+```text id="h3wdn5"
 pot += moneyToPot
+```
+
+---
+
+# 10. FUND SYSTEM
+
+## Purpose
+
+```text id="2jlwm0"
+reserve money for payouts
+```
+
+---
+
+# 11. FUND UPDATE FLOW
+
+## Formula
+
+```text id="0x2cbk"
 fund += moneyToFund
 ```
 
 ---
 
-# 9. RANDOM SYSTEM
+# 12. FUND RESPONSIBILITY
 
-## Weighted Random
+Fund dùng để:
 
-Không random đều.
+```text id="yjlwm0"
+normal payout
+big payout
+jackpot payout
+free spin payout
+cascade payout
+```
 
 ---
+
+# 13. PAYOUT FLOW
 
 ## Formula
 
-```text
-P(symbol) =
-symbolWeight / totalWeight
+```text id="ujlwm0"
+fund -= payout
 ```
 
 ---
 
-# 10. RANDOM FLOW
-
-```text
-random number
-↓
-loop weight
-↓
-cumulative weight
-↓
-select symbol
-```
-
----
-
-# 11. BOARD GENERATION
-
-```text
-generate 4x5 board
-↓
-random từng cell theo weight
-↓
-return board
-```
-
----
-
-# 12. WAYS SYSTEM
-
-## Mahjong2 không dùng paylines
-
-Mahjong2 dùng:
-
-```text
-consecutive reel ways
-```
-
----
-
-# 13. WIN CONDITION
+# 14. SAFETY CHECK
 
 ## Rule
 
-```text
-ít nhất 3 reel liên tiếp
-có symbol giống nhau
-```
-
----
-
-# 14. WILD RULE
-
-## Rule
-
-```text
-Wild replace payable symbol
-```
-
----
-
-## Example
-
-```text
-ITEM_1
-ITEM_1
-WILD
-ITEM_1
-```
-
-→
-
-```text
-4 ITEM_1
-```
-
----
-
-# 15. WAYS CALCULATION
-
-## Formula
-
-```text
-ways =
-reel1Count ×
-reel2Count ×
-reel3Count ...
-```
-
----
-
-## Example
-
-| Reel   | ITEM_1 Count |
-| ------ | ------------ |
-| Reel 1 | 2            |
-| Reel 2 | 2            |
-| Reel 3 | 1            |
-
----
-
-## Ways
-
-```text
-2 × 2 × 1 = 4 ways
-```
-
----
-
-# 16. WAYS FLOW
-
-```text
-loop symbol
-↓
-count symbol per reel
-↓
-check consecutive reels
-↓
-calculate ways
-↓
-calculate payout
-```
-
----
-
-# 17. PAYTABLE DESIGN
-
-Paytable là config.
-
-Không hardcode payout giả thành luật thật.
-
----
-
-# 18. PAYOUT FORMULA
-
-```text
-payout =
-betValue ×
-payRate ×
-ways ×
-multiplier
-```
-
----
-
-# 19. FREE SPIN RULE
-
-## Trigger
-
-```text
-3 SCATTER anywhere
-```
-
----
-
-## Effect
-
-```text
-10 free spins
-```
-
----
-
-# 20. BONUS RULE
-
-## Trigger
-
-```text
-3 BONUS anywhere
-```
-
----
-
-## Effect
-
-```text
-bonus game
-```
-
----
-
-# 21. JACKPOT RULE
-
-## Trigger condition
-
-```text
-fund > 2 × initPot
-```
-
-và:
-
-```text
-random jackpot hit
-```
-
----
-
-## Jackpot Prize
-
-```text
-jackpotPrize = pot
-```
-
-hoặc:
-
-```text
-jackpotPrize = 2 × pot
-```
-
----
-
-## Reset
-
-```text
-pot = initPotValue
-```
-
----
-
-# 22. SAFETY CHECK
-
-## Rule
-
-```text
+```text id="9bjlwm"
 fund - payout >= 0
 ```
 
 ---
 
-## Nếu không đủ fund
+# 15. SAFETY PURPOSE
 
-```text
+Mục tiêu:
+
+```text id="pjlwm0"
+không cho game trả vượt quỹ
+```
+
+---
+
+# 16. SAFETY FAILURE
+
+Nếu:
+
+```text id="3mjlwm"
+fund - payout < 0
+```
+
+backend phải:
+
+```text id="wjlwm0"
 deny jackpot
-deny big payout
+deny dangerous payout
 generate safe result
 ```
 
 ---
 
-# 23. AUTO PLAY FLOW
+# 17. JACKPOT SYSTEM
 
-```text
-AUTO_PLAY_MAHJONG2
+Mahjong2 reuse jackpot architecture cũ.
+
+---
+
+# 18. JACKPOT PURPOSE
+
+## Goal
+
+```text id="djlwm0"
+big random reward
+```
+
+---
+
+# 19. JACKPOT CONDITION
+
+## Main Rule
+
+```text id="vjlwm0"
+fund > 2 × initPotValue
+```
+
+---
+
+# 20. WHY THIS CONDITION EXISTS
+
+Mục tiêu:
+
+```text id="jjlwm0"
+đảm bảo quỹ đủ lớn trước khi nổ jackpot
+```
+
+---
+
+# 21. JACKPOT RANDOM FLOW
+
+```text id="2zjlwm"
+check jackpot condition
 ↓
-loop PLAY_MAHJONG2
+random jackpot chance
 ↓
-STOP_PLAY_MAHJONG2
+if hit
+→ payout jackpot
 ```
 
 ---
 
-# 24. FORCE STOP CONDITION
+# 22. JACKPOT PRIZE
 
-## Trigger khi:
+## Formula
 
-```text
-- hết tiền
-- disconnect
-- invalid session
-- room error
+```text id="gjlwm0"
+jackpotPrize = pot
 ```
 
 ---
 
-# 25. SOCKET COMMANDS
+## Optional Variant
 
-## Client → Server
+Một số room có thể:
 
-| Command              | ID   |
-| -------------------- | ---- |
-| SUBSCRIBE_MAHJONG2   | 6000 |
-| CHANGE_ROOM_MAHJONG2 | 6001 |
-| PLAY_MAHJONG2        | 6002 |
-| AUTO_PLAY_MAHJONG2   | 6003 |
-| STOP_PLAY_MAHJONG2   | 6004 |
-| UNSUBSCRIBE_MAHJONG2 | 6005 |
-
----
-
-## Server → Client
-
-| Command                  | ID   |
-| ------------------------ | ---- |
-| RESULT_MAHJONG2          | 6050 |
-| UPDATE_POT_MAHJONG2      | 6051 |
-| BIG_WIN_MAHJONG2         | 6052 |
-| FORCE_STOP_PLAY_MAHJONG2 | 6053 |
-
----
-
-# 26. DATABASE FLOW
-
-## Core Tables
-
-| Table           | Purpose         |
-| --------------- | --------------- |
-| wallets         | user balance    |
-| fund            | game fund       |
-| jackpot_pot     | jackpot pot     |
-| transactions    | ledger          |
-| spin_history    | spin history    |
-| jackpot_history | jackpot history |
-
----
-
-# 27. SPIN HISTORY
-
-## Save Data
-
-| Field        | Purpose      |
-| ------------ | ------------ |
-| userId       | player       |
-| roomId       | current room |
-| totalBet     | total bet    |
-| matrix       | board result |
-| wins         | ways result  |
-| totalWin     | payout       |
-| jackpotPrize | jackpot      |
-| createdTime  | audit        |
-
----
-
-# 28. RESPONSE DESIGN
-
-## RESULT_MAHJONG2
-
-```json
-{
-  "cmd": 6050,
-
-  "spinId": "",
-
-  "matrix": [],
-
-  "wins": [],
-
-  "totalWin": 0,
-
-  "balance": 0,
-
-  "bet": {},
-
-  "features": {},
-
-  "jackpot": {},
-
-  "state": {}
-}
+```text id="ajlwm0"
+jackpotPrize = pot × 2
 ```
 
 ---
 
-# 29. WINS[] STRUCTURE
+# 23. JACKPOT PAYOUT FLOW
 
-```json
-{
-  "symbol": "ITEM_1",
-
-  "matchCount": 4,
-
-  "ways": 8,
-
-  "multiplier": 1,
-
-  "winAmount": 3200,
-
-  "positions": [
-    [0,0],
-    [1,0],
-    [1,1]
-  ]
-}
+```text id="d4h6br"
+trigger jackpot
+↓
+reward player
+↓
+fund -= jackpotPrize
+↓
+reset pot
+↓
+save jackpot history
+↓
+broadcast big win
 ```
 
 ---
 
-# 30. FRONTEND HIGHLIGHT DATA
+# 24. POT RESET
 
-Frontend dùng:
+## Formula
 
-```text
-positions[]
+```text id="8jlwm0"
+pot = initPotValue
+```
+
+---
+
+# 25. INIT POT VALUE
+
+## Example
+
+```text id="2djlwm"
+room 1 = 1,000,000
+room 2 = 5,000,000
+room 3 = 10,000,000
+```
+
+---
+
+# 26. ROOM-BASED ECONOMY
+
+Mỗi room có:
+
+| Property       | Description   |
+| -------------- | ------------- |
+| bet config     | mức cược      |
+| pot            | jackpot riêng |
+| fund           | quỹ riêng     |
+| RTP config     | riêng         |
+| jackpot config | riêng         |
+
+---
+
+# 27. RTP CONTROL
+
+## Purpose
+
+```text id="xjlwm0"
+control long-term payout ratio
+```
+
+---
+
+# 28. RTP FLOW
+
+Backend có thể:
+
+```text id="0jlwm0"
+increase/decrease symbol weight
 ```
 
 để:
 
-```text
-highlight symbol thắng
-play ways animation
+```text id="rjlwm0"
+control payout frequency
 ```
 
 ---
 
-# 31. FINAL BACKEND DESIGN
+# 29. RTP CONTROL TARGET
 
-Mahjong2 final backend architecture:
+Ví dụ:
 
-| Thành phần | Final Design    |
-| ---------- | --------------- |
-| Board      | 4x5             |
-| Win System | Ways            |
-| Payline    | removed         |
-| Engine     | Ways Engine     |
-| Bet Input  | betLevel        |
-| Random     | weighted random |
-| Response   | ways-centric    |
-| Highlight  | positions       |
-| Economy    | reuse system cũ |
-| Jackpot    | reuse system cũ |
-| Socket     | numeric command |
+| RTP | Meaning |
+| --- | ------- |
+| 94% | trả 94% |
+| 96% | trả 96% |
+| 98% | trả 98% |
+
+---
+
+# 30. RANDOM CONTROL SYSTEM
+
+Backend không random đều.
+
+Backend dùng:
+
+```text id="7jlwm0"
+weighted random
+```
+
+---
+
+# 31. WEIGHT PURPOSE
+
+Dùng để control:
+
+| Feature             | Control |
+| ------------------- | ------- |
+| win rate            | YES     |
+| RTP                 | YES     |
+| jackpot frequency   | YES     |
+| scatter frequency   | YES     |
+| free spin frequency | YES     |
+| golden frequency    | YES     |
+
+---
+
+# 32. GOLDEN CONTROL
+
+Golden symbol chỉ spawn:
+
+```text id="zjlwm0"
+reels 2, 3, 4
+```
+
+---
+
+# 33. GOLDEN RESTRICTION
+
+Không cho:
+
+```text id="m8jlwm"
+WILD
+SCATTER
+```
+
+spawn golden.
+
+---
+
+# 34. FREE SPIN ECONOMY
+
+Free spin vẫn dùng:
+
+```text id="njlwm0"
+fund payout bình thường
+```
+
+---
+
+# 35. FREE SPIN PAYOUT FLOW
+
+```text id="v5jlwm"
+free spin win
+↓
+calculate cascade
+↓
+apply multiplier
+↓
+deduct fund
+↓
+credit player
+```
+
+---
+
+# 36. CASCADE ECONOMY
+
+Cascade payout được cộng dồn.
+
+---
+
+# 37. CASCADE FLOW
+
+```text id="0g69cn"
+spin
+↓
+ways win
+↓
+payout step 1
+↓
+cascade
+↓
+ways win
+↓
+payout step 2
+↓
+cascade
+↓
+...
+↓
+final total payout
+```
+
+---
+
+# 38. TOTAL WIN FORMULA
+
+## Formula
+
+```text id="r3jlwm"
+totalWin =
+sum(all cascade payouts)
++
+jackpotPrize
+```
+
+---
+
+# 39. BIG WIN SYSTEM
+
+## Purpose
+
+```text id="3jlwm0"
+broadcast large reward
+```
+
+---
+
+# 40. BIG WIN CONDITION
+
+Ví dụ:
+
+```text id="qjlwm0"
+totalWin >= 100 × totalBet
+```
+
+---
+
+# 41. BIG WIN FLOW
+
+```text id="jlwm00"
+detect big win
+↓
+broadcast to room/server
+↓
+frontend animation
+```
+
+---
+
+# 42. TRANSACTION SYSTEM
+
+## Purpose
+
+Audit tài chính.
+
+---
+
+# 43. SAVE TRANSACTION FLOW
+
+```text id="jlwm11"
+deduct bet
+↓
+save debit transaction
+↓
+reward player
+↓
+save credit transaction
+```
+
+---
+
+# 44. TRANSACTION TYPES
+
+| Type          | Meaning          |
+| ------------- | ---------------- |
+| BET           | deduct bet       |
+| WIN           | normal win       |
+| JACKPOT       | jackpot reward   |
+| FREE_SPIN_WIN | free spin reward |
+
+---
+
+# 45. SPIN HISTORY SYSTEM
+
+## Purpose
+
+```text id="jlwm22"
+audit gameplay
+```
+
+---
+
+# 46. SPIN HISTORY SAVE DATA
+
+| Data         | Purpose  |
+| ------------ | -------- |
+| userId       | player   |
+| roomId       | room     |
+| totalBet     | bet      |
+| reels        | board    |
+| cascadeSteps | gameplay |
+| totalWin     | payout   |
+| jackpotPrize | jackpot  |
+| createdTime  | audit    |
+
+---
+
+# 47. JACKPOT HISTORY SYSTEM
+
+## Save Data
+
+| Data          | Purpose        |
+| ------------- | -------------- |
+| userId        | jackpot player |
+| jackpotAmount | reward         |
+| roomId        | room           |
+| createdTime   | audit          |
+
+---
+
+# 48. AUTO PLAY ECONOMY FLOW
+
+```text id="jlwm33"
+auto play
+↓
+repeat play flow
+↓
+stop if:
+- not enough money
+- disconnect
+- invalid session
+```
+
+---
+
+# 49. FORCE STOP AUTO PLAY
+
+## Backend Trigger
+
+| Trigger              | Reason |
+| -------------------- | ------ |
+| insufficient balance | stop   |
+| room error           | stop   |
+| disconnect           | stop   |
+| invalid session      | stop   |
+
+---
+
+# 50. JACKPOT ARCHITECTURE SUMMARY
+
+Mahjong2 jackpot system gồm:
+
+| Component       | Purpose          |
+| --------------- | ---------------- |
+| wallet          | player balance   |
+| fund            | payout reserve   |
+| pot             | jackpot pool     |
+| RTP control     | payout balancing |
+| weighted random | outcome control  |
+| safety check    | prevent bankrupt |
+| transaction     | financial audit  |
+| spin history    | gameplay audit   |
+
+---
+
+# 51. FINAL ECONOMY FLOW
+
+```text id="jlwm44"
+player spin
+↓
+deduct totalBet
+↓
+split fee/pot/fund
+↓
+update economy
+↓
+generate result
+↓
+process cascade
+↓
+process multiplier
+↓
+calculate payout
+↓
+check jackpot
+↓
+safety check
+↓
+reward player
+↓
+save transaction
+↓
+save history
+↓
+broadcast result
+```
