@@ -1,10 +1,38 @@
-# Mahjong Ways 2 — Command & Response Flow
+# Mahjong Ways 2 — Frontend Command & Response Flow
 
 ---
 
-## 1. Cấu trúc & Symbol / Item Mahjong Ways 2
+## 1. Mục tiêu tài liệu
 
-### 1.1. Cấu trúc game
+Tài liệu này mô tả flow tích hợp Frontend với Backend cho game **Mahjong Ways 2**.
+
+Backend hiện dùng **SeamlessWallet** để xử lý tiền, nên frontend cần hiểu rõ:
+
+```text
+Frontend không tự trừ tiền.
+Frontend không tự cộng tiền.
+Frontend chỉ update balance bằng response từ Backend.
+Backend sẽ gọi /game/wallet để xử lý tiền.
+```
+
+Flow backend mới:
+
+```text
+JOIN
+→ /game/wallet getBalance
+→ INFO_MAHJONG2
+
+PLAY
+→ /game/wallet bet
+→ bet success mới RNG
+→ /game/wallet settle
+→ nếu có jackpot: /game/wallet jackpotWin
+→ RESULT_MAHJONG2
+```
+
+---
+
+## 2. Cấu trúc game Mahjong Ways 2
 
 Mahjong Ways 2 là game slot dùng **Ways System**, không dùng payline cố định.
 
@@ -20,7 +48,9 @@ Free Spin
 Wild thay symbol thường, không thay Scatter
 ```
 
-### 1.2. Reel layout
+---
+
+## 3. Reel layout
 
 | Reel   | Số row |
 | ------ | -----: |
@@ -36,9 +66,17 @@ Tổng số ways:
 4 × 5 × 5 × 5 × 4 = 2,000 ways
 ```
 
+Frontend render theo dạng:
+
+```text
+reels[reelIndex][rowIndex]
+```
+
+Không render như matrix đều `4x5`.
+
 ---
 
-### 1.3. Symbol / Item chính
+## 4. Symbol / Item chính
 
 Backend hiện xác nhận các symbol chính dùng trên reels:
 
@@ -56,7 +94,7 @@ Backend hiện xác nhận các symbol chính dùng trên reels:
 
 ---
 
-### 1.4. Golden Symbol
+## 5. Golden Symbol
 
 `Golden` không phải là một symbol riêng. Đây là trạng thái đặc biệt của symbol thường.
 
@@ -77,9 +115,17 @@ Golden không áp dụng cho WILD và SCATTER.
 Golden Symbol tham gia winning ways sẽ chuyển thành WILD ở cascade tiếp theo.
 ```
 
+Frontend render bằng:
+
+```text
+symbol asset + golden overlay / golden frame / golden effect
+```
+
+Không cần asset riêng dạng `GOLDEN_ITEM`.
+
 ---
 
-### 1.5. Symbol chưa xác nhận
+## 6. Symbol chưa xác nhận
 
 Hiện chưa có rule chính thức cho các symbol sau trên reels:
 
@@ -89,22 +135,20 @@ JP
 JACKPOT
 ```
 
-Vì vậy, không đưa các symbol này vào reel symbol list nếu chưa có rule/asset/source xác nhận.
+Vì vậy frontend không tự giả định có các symbol này nếu backend không trả trong `symbols[]` hoặc `reels[]`.
 
 ---
 
-### 1.6. Jackpot
+## 7. Jackpot
 
-Jackpot nếu có sẽ được xử lý ở tầng **system/economy**, không phải symbol bắt buộc xuất hiện trên board.
-
-Nói cách khác:
+Jackpot nếu có là reward ở tầng system/economy, không phải symbol bắt buộc xuất hiện trên board.
 
 ```text
 Jackpot là reward system.
 JP / JACKPOT không phải reel symbol mặc định.
 ```
 
-Response có thể có object jackpot để báo trạng thái nổ hũ:
+Response jackpot dùng để frontend hiển thị animation jackpot:
 
 ```json
 {
@@ -117,132 +161,127 @@ Response có thể có object jackpot để báo trạng thái nổ hũ:
 }
 ```
 
-
-## 2. Command ID convention
-
-Vì là project độc lập, đề xuất chia command như sau:
-
-|       Range | Ý nghĩa                        |
-| ----------: | ------------------------------ |
-| `1000–1099` | Auth / connection              |
-| `2000–2099` | Client → Server request        |
-| `3000–3099` | Server → Client response/event |
-|      `3999` | Error                          |
-
-> ID bên dưới là đề xuất protocol. Nếu backend gateway đã có convention khác thì giữ tên command, đổi ID theo gateway.
+Nếu jackpot nổ, backend sẽ xử lý `jackpotWin` sau `settle`, frontend chỉ render theo response.
 
 ---
 
-## 3. Command list
+# 8. Command ID convention
 
-### 3.1. Client → Server
+Dự án dùng lại command convention cũ theo block `4001–4016`.
 
-| Command                   |     ID | Mục đích             |
-| ------------------------- | -----: | -------------------- |
-| `LOGIN`                   | `1000` | Xác thực user        |
-| `SUBSCRIBE_MAHJONG2`      | `2001` | Vào game / join room |
-| `UNSUBSCRIBE_MAHJONG2`    | `2002` | Thoát game           |
-| `CHANGE_ROOM_MAHJONG2`    | `2003` | Đổi room / mức cược  |
-| `PLAY_MAHJONG2`           | `2004` | Quay 1 lượt          |
-| `AUTO_PLAY_MAHJONG2`      | `2005` | Bật auto play        |
-| `STOP_AUTO_PLAY_MAHJONG2` | `2006` | Dừng auto play       |
-| `MINIMIZE_MAHJONG2`       | `2007` | Thu nhỏ game         |
-| `HISTORY_MAHJONG2`        | `2008` | Lấy lịch sử          |
-| `PING`                    | `2098` | Giữ kết nối          |
-| `LOGOUT`                  | `2099` | Đăng xuất            |
+## 8.1. Client → Server
+
+| Command                   |     ID | Mục đích                       |
+| ------------------------- | -----: | ------------------------------ |
+| `PLAY_MAHJONG2`           | `4001` | Quay 1 lượt / nhận result      |
+| `SUBSCRIBE_MAHJONG2`      | `4003` | Vào game / join room           |
+| `UNSUBSCRIBE_MAHJONG2`    | `4004` | Thoát game                     |
+| `CHANGE_ROOM_MAHJONG2`    | `4005` | Đổi room / mức cược            |
+| `AUTO_PLAY_MAHJONG2`      | `4006` | Bật auto play                  |
+| `STOP_AUTO_PLAY_MAHJONG2` | `4007` | Dừng auto play                 |
+| `MINIMIZE_MAHJONG2`       | `4013` | Thu nhỏ game                   |
+| `HISTORY_MAHJONG2`        | `4015` | Lấy lịch sử nếu backend hỗ trợ |
 
 ---
 
-### 3.2. Server → Client
+## 8.2. Server → Client
 
 | Command                    |     ID | Mục đích                           |
 | -------------------------- | -----: | ---------------------------------- |
-| `LOGIN_RESULT`             | `3000` | Kết quả login                      |
-| `INFO_MAHJONG2`            | `3001` | Game config + room state           |
-| `RESULT_MAHJONG2`          | `3002` | Kết quả spin                       |
-| `UPDATE_POT_MAHJONG2`      | `3003` | Update jackpot pot nếu bật jackpot |
-| `BIG_WIN_MAHJONG2`         | `3004` | Broadcast thắng lớn                |
-| `FORCE_STOP_AUTO_MAHJONG2` | `3005` | Server bắt dừng auto               |
-| `MINIMIZE_RESULT_MAHJONG2` | `3006` | Kết quả khi minimize               |
-| `HISTORY_RESULT_MAHJONG2`  | `3007` | Trả lịch sử                        |
-| `PONG`                     | `3098` | Phản hồi ping                      |
+| `RESULT_MAHJONG2`          | `4001` | Kết quả spin                       |
+| `UPDATE_POT_MAHJONG2`      | `4002` | Update jackpot pot nếu bật jackpot |
+| `FORCE_STOP_AUTO_MAHJONG2` | `4008` | Server bắt dừng auto               |
+| `INFO_MAHJONG2`            | `4009` | Game config + room state           |
+| `BIG_WIN_MAHJONG2`         | `4010` | Broadcast thắng lớn / jackpot      |
+| `TOTAL_FREE_SPIN_MAHJONG2` | `4011` | Sync tổng Free Spin nếu cần        |
+| `MINIMIZE_RESULT_MAHJONG2` | `4014` | Kết quả khi minimize               |
+| `HISTORY_RESULT_MAHJONG2`  | `4016` | Trả lịch sử nếu backend hỗ trợ     |
 | `ERROR`                    | `3999` | Lỗi chuẩn                          |
 
 ---
 
-## 4. Full flow tổng quan
+# 9. Session token rule
+
+Frontend nhận `session_token` từ game launch URL.
+
+Ví dụ:
 
 ```text
-LOGIN
+https://game-domain.com/index.html?token=SESSION_TOKEN&game=MAHJONG_WAYS_2
+```
+
+Frontend phải gửi `sessionToken` trong các request chính:
+
+```text
+SUBSCRIBE_MAHJONG2
+PLAY_MAHJONG2
+CHANGE_ROOM_MAHJONG2 nếu backend yêu cầu
+AUTO_PLAY_MAHJONG2 nếu backend yêu cầu
+```
+
+Frontend không gọi Partner Callback và không gọi `/game/wallet` trực tiếp.
+
+---
+
+# 10. Full flow tổng quan
+
+```text
+LAUNCH GAME
+↓
+Frontend lấy sessionToken từ URL
 ↓
 SUBSCRIBE_MAHJONG2
 ↓
-INFO_MAHJONG2
+Backend gọi /game/wallet getBalance
 ↓
-CHANGE_ROOM_MAHJONG2 nếu cần
+INFO_MAHJONG2
 ↓
 PLAY_MAHJONG2
 ↓
+Backend gọi /game/wallet bet
+↓
+bet success mới RNG
+↓
+Backend xử lý reels / ways / cascade / freeSpin / jackpot
+↓
+Backend gọi /game/wallet settle
+↓
+Nếu có jackpot: Backend gọi /game/wallet jackpotWin
+↓
 RESULT_MAHJONG2
 ↓
-UPDATE_POT_MAHJONG2 nếu pot thay đổi
-↓
-BIG_WIN_MAHJONG2 nếu đủ điều kiện
-↓
-AUTO_PLAY_MAHJONG2 nếu bật auto
-↓
-STOP_AUTO_PLAY_MAHJONG2 / FORCE_STOP_AUTO_MAHJONG2
-↓
-MINIMIZE_MAHJONG2 nếu thu nhỏ
-↓
-UNSUBSCRIBE_MAHJONG2
+Frontend render result + update balance bằng RESULT.balance
 ```
 
 ---
 
-## 5. LOGIN
+# 11. SUBSCRIBE_MAHJONG2
 
-### Client → Server
-
-```json
-{
-  "cmd": 1000,
-  "token": "USER_TOKEN"
-}
-```
-
-### Server → Client
+## Client → Server
 
 ```json
 {
-  "cmd": 3000,
-  "success": true,
-  "user": {
-    "userId": 1001,
-    "nickname": "playerA",
-    "balance": 1000000
-  }
-}
-```
-
----
-
-## 6. SUBSCRIBE_MAHJONG2
-
-### Client → Server
-
-```json
-{
-  "cmd": 2001,
+  "cmd": 4003,
+  "sessionToken": "SESSION_TOKEN",
   "roomId": 1
 }
 ```
 
-### Server → Client: INFO_MAHJONG2
+Backend sẽ gọi:
+
+```text
+/game/wallet action=getBalance
+```
+
+Sau đó trả `INFO_MAHJONG2`.
+
+---
+
+## Server → Client: INFO_MAHJONG2
 
 ```json
 {
-  "cmd": 3001,
+  "cmd": 4009,
 
   "room": {
     "roomId": 1,
@@ -334,6 +373,7 @@ UNSUBSCRIBE_MAHJONG2
 
   "playerState": {
     "balance": 1000000,
+    "currency": "VND",
     "mode": "BASE",
     "remainingFreeSpin": 0,
     "autoPlay": false,
@@ -351,22 +391,25 @@ freeSpinGoldenReel: 2 = reel 3 nếu index từ 0.
 
 ---
 
-## 7. CHANGE_ROOM_MAHJONG2
+# 12. CHANGE_ROOM_MAHJONG2
 
-### Client → Server
+## Client → Server
 
 ```json
 {
-  "cmd": 2003,
+  "cmd": 4005,
+  "sessionToken": "SESSION_TOKEN",
   "roomId": 2
 }
 ```
 
-### Server → Client
+## Server → Client
+
+Backend trả lại `INFO_MAHJONG2`.
 
 ```json
 {
-  "cmd": 3001,
+  "cmd": 4009,
 
   "room": {
     "roomId": 2,
@@ -380,6 +423,7 @@ freeSpinGoldenReel: 2 = reel 3 nếu index từ 0.
 
   "playerState": {
     "balance": 1000000,
+    "currency": "VND",
     "mode": "BASE",
     "remainingFreeSpin": 0,
     "autoPlay": false,
@@ -390,13 +434,14 @@ freeSpinGoldenReel: 2 = reel 3 nếu index từ 0.
 
 ---
 
-## 8. PLAY_MAHJONG2
+# 13. PLAY_MAHJONG2
 
-### Client → Server
+## Client → Server
 
 ```json
 {
-  "cmd": 2004,
+  "cmd": 4001,
+  "sessionToken": "SESSION_TOKEN",
   "roomId": 1,
   "betSize": 2.5,
   "betLevel": 9,
@@ -405,7 +450,9 @@ freeSpinGoldenReel: 2 = reel 3 nếu index từ 0.
 }
 ```
 
-### Bet formula
+---
+
+## Bet formula
 
 ```text
 lineBet = betSize × betLevel
@@ -419,16 +466,54 @@ lineBet = 2.5 × 9 = 22.5
 totalBet = 22.5 × 20 = 450
 ```
 
+Frontend chỉ hiển thị bet. Backend là nơi tính và xác nhận tiền thật.
+
 ---
 
-## 9. RESULT_MAHJONG2 — response chuẩn
+# 14. Backend play flow frontend cần biết
 
-### Server → Client
+```text
+Frontend gửi PLAY_MAHJONG2
+↓
+Backend gọi /game/wallet action=bet
+↓
+Nếu bet fail:
+    Backend trả ERROR
+    Frontend không chạy spin result
+↓
+Nếu bet success:
+    Backend mới RNG
+    Backend tính ways/cascade/freeSpin/jackpot
+    Backend gọi /game/wallet action=settle
+    Nếu có jackpot: Backend gọi /game/wallet action=jackpotWin
+↓
+Backend trả RESULT_MAHJONG2
+↓
+Frontend render result và update balance
+```
+
+Frontend không cần gọi:
+
+```text
+getBalance
+bet
+settle
+jackpotWin
+```
+
+Frontend chỉ gọi socket command của game.
+
+---
+
+# 15. RESULT_MAHJONG2 — response chuẩn
+
+## Server → Client
 
 ```json
 {
-  "cmd": 3002,
+  "cmd": 4001,
   "spinId": "SPIN_10001",
+  "roundId": "RND_MW2_SPIN_10001",
   "roomId": 1,
 
   "reels": [
@@ -522,7 +607,6 @@ totalBet = 22.5 × 20 = 450
   ],
 
   "totalWin": 1800,
-
   "balance": 1001350,
 
   "bet": {
@@ -531,6 +615,14 @@ totalBet = 22.5 × 20 = 450
     "baseBet": 20,
     "lineBet": 22.5,
     "totalBet": 450
+  },
+
+  "seamless": {
+    "enabled": true,
+    "betTransactionId": "BET_MW2_SPIN_10001",
+    "settleTransactionId": "WIN_MW2_SPIN_10001",
+    "jackpotTransactionId": null,
+    "payoutStatus": "SUCCESS"
   },
 
   "freeSpin": {
@@ -560,9 +652,9 @@ totalBet = 22.5 × 20 = 450
 
 ---
 
-## 10. Payout rule trong response
+# 16. Payout rule trong response
 
-Mỗi `win` nên phản ánh đúng công thức backend:
+Mỗi `win` phản ánh công thức backend:
 
 ```text
 winAmount = payTableValue × lineBet × ways × multiplier
@@ -575,18 +667,51 @@ lineBet = betSize × betLevel
 totalBet = lineBet × baseBet
 ```
 
-Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `winAmount`.
+Frontend không tự tính tiền thắng. Frontend chỉ render:
+
+```text
+wins[].winAmount
+cascadeSteps[].stepWin
+totalWin
+balance
+```
 
 ---
 
-## 11. Free Spin trigger result
+# 17. Seamless payout status
 
-### 3 Scatter
+Frontend cần đọc:
+
+```json
+"seamless": {
+  "enabled": true,
+  "payoutStatus": "SUCCESS"
+}
+```
+
+Các trạng thái có thể dùng:
+
+| Status            | Ý nghĩa                                     | Frontend nên làm                                              |
+| ----------------- | ------------------------------------------- | ------------------------------------------------------------- |
+| `SUCCESS`         | Bet/settle hoàn tất                         | Render result bình thường                                     |
+| `SETTLE_PENDING`  | Result đã có nhưng settle đang pending      | Hiển thị trạng thái đang xử lý / không cho spin mới           |
+| `JACKPOT_PENDING` | JackpotWin đang pending                     | Hiển thị đang xử lý jackpot / không reset UI pot như hoàn tất |
+| `CANCELLED`       | Bet đã được cancel do lỗi game trước result | Hiển thị lỗi, không render spin                               |
+| `CANCEL_PENDING`  | Cancel đang pending                         | Hiển thị lỗi xử lý, chờ backend                               |
+
+Trong production, backend nên hạn chế trả result thắng nếu payout chưa hoàn tất. Nhưng nếu có trả pending, frontend phải dựa vào `payoutStatus`.
+
+---
+
+# 18. Free Spin trigger result
+
+## 3 Scatter
 
 ```json
 {
-  "cmd": 3002,
+  "cmd": 4001,
   "spinId": "SPIN_10002",
+  "roundId": "RND_MW2_SPIN_10002",
   "roomId": 1,
 
   "reels": [],
@@ -601,6 +726,14 @@ Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `w
     "baseBet": 20,
     "lineBet": 22.5,
     "totalBet": 450
+  },
+
+  "seamless": {
+    "enabled": true,
+    "betTransactionId": "BET_MW2_SPIN_10002",
+    "settleTransactionId": "WIN_MW2_SPIN_10002",
+    "jackpotTransactionId": null,
+    "payoutStatus": "SUCCESS"
   },
 
   "freeSpin": {
@@ -628,7 +761,7 @@ Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `w
 }
 ```
 
-### 4 Scatter
+## 4 Scatter
 
 ```json
 "freeSpin": {
@@ -640,7 +773,7 @@ Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `w
 }
 ```
 
-### 5 Scatter
+## 5 Scatter
 
 ```json
 "freeSpin": {
@@ -654,12 +787,26 @@ Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `w
 
 ---
 
-## 12. RESULT trong Free Spin
+# 19. RESULT trong Free Spin
+
+Frontend vẫn gửi `PLAY_MAHJONG2`.
+
+Backend xử lý Free Spin nội bộ:
+
+```text
+Không gọi bet mới.
+Dùng bet state của lượt trigger.
+Settlement Free Spin do backend xử lý theo strategy nội bộ.
+Frontend chỉ render RESULT.
+```
+
+Response:
 
 ```json
 {
-  "cmd": 3002,
+  "cmd": 4001,
   "spinId": "FREE_SPIN_10003",
+  "roundId": "RND_MW2_FREE_SPIN_10003",
   "roomId": 1,
 
   "reels": [],
@@ -679,7 +826,6 @@ Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `w
   ],
 
   "totalWin": 0,
-
   "balance": 1001350,
 
   "bet": {
@@ -688,6 +834,14 @@ Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `w
     "baseBet": 20,
     "lineBet": 22.5,
     "totalBet": 450
+  },
+
+  "seamless": {
+    "enabled": true,
+    "betTransactionId": null,
+    "settleTransactionId": "WIN_MW2_FREE_SPIN_10003",
+    "jackpotTransactionId": null,
+    "payoutStatus": "SUCCESS"
   },
 
   "freeSpin": {
@@ -718,15 +872,16 @@ Không dùng frontend để tính lại tiền thắng. Frontend chỉ render `w
 Rule trong Free Spin:
 
 ```text
-Không deduct bet.
-Payout vẫn dùng lineBet của lượt trigger / free spin state.
+Frontend không gửi bet riêng.
+Không deduct bet mới.
+Payout dùng lineBet của lượt trigger / free spin state.
 Multiplier dùng bảng FREE_SPIN: x2, x4, x6, x10.
 Reel 3 có Golden rule, trừ WILD và SCATTER.
 ```
 
 ---
 
-## 13. Retrigger Free Spin
+# 20. Retrigger Free Spin
 
 Nếu đang Free Spin và tiếp tục có đủ Scatter:
 
@@ -750,74 +905,21 @@ retriggered = true vì đang trong FREE_SPIN mode
 
 ---
 
-## 14. UPDATE_POT_MAHJONG2
+# 21. Jackpot result
 
-Gửi khi:
-
-```text
-pot thay đổi sau spin
-pot reset sau jackpot
-client subscribe / change room
-```
+Nếu jackpot nổ:
 
 ```json
 {
-  "cmd": 3003,
-  "roomId": 1,
-  "pot": 1200450
-}
-```
-
-Nếu project không bật jackpot:
-
-```text
-Không cần gửi UPDATE_POT_MAHJONG2.
-INFO/RESULT có thể trả jackpot.enabled = false.
-```
-
----
-
-## 15. BIG_WIN_MAHJONG2
-
-```json
-{
-  "cmd": 3004,
-  "roomId": 1,
-  "nickname": "playerA",
-  "amount": 5000000,
-  "type": "BIG_WIN"
-}
-```
-
-Nếu là jackpot:
-
-```json
-{
-  "cmd": 3004,
-  "roomId": 1,
-  "nickname": "playerA",
-  "amount": 12000000,
-  "type": "JACKPOT"
-}
-```
-
----
-
-## 16. RESULT khi nổ Jackpot
-
-Chỉ dùng nếu project bật jackpot system.
-
-```json
-{
-  "cmd": 3002,
+  "cmd": 4001,
   "spinId": "SPIN_10004",
+  "roundId": "RND_MW2_SPIN_10004",
   "roomId": 1,
 
   "reels": [],
   "cascadeSteps": [],
 
   "totalWin": 12000000,
-
   "balance": 13000000,
 
   "bet": {
@@ -826,6 +928,14 @@ Chỉ dùng nếu project bật jackpot system.
     "baseBet": 20,
     "lineBet": 22.5,
     "totalBet": 450
+  },
+
+  "seamless": {
+    "enabled": true,
+    "betTransactionId": "BET_MW2_SPIN_10004",
+    "settleTransactionId": "WIN_MW2_SPIN_10004",
+    "jackpotTransactionId": "JP_MW2_SPIN_10004",
+    "payoutStatus": "SUCCESS"
   },
 
   "freeSpin": {
@@ -853,22 +963,80 @@ Chỉ dùng nếu project bật jackpot system.
 }
 ```
 
-Lưu ý:
+Rule:
 
 ```text
-Jackpot là system reward.
-Không tự giả định có JP symbol trên reels nếu luật/asset không xác nhận.
+Nếu jackpot.triggered = true:
+- Frontend render jackpot animation.
+- balance là balance sau jackpotWin.
+- state.pot là pot sau khi backend đã xử lý reset.
+```
+
+Nếu `payoutStatus = JACKPOT_PENDING`, frontend không nên hiển thị jackpot như đã hoàn tất.
+
+---
+
+# 22. UPDATE_POT_MAHJONG2
+
+Gửi khi:
+
+```text
+pot thay đổi sau spin
+pot reset sau jackpot
+client subscribe / change room
+```
+
+```json
+{
+  "cmd": 4002,
+  "roomId": 1,
+  "pot": 1200450
+}
+```
+
+Nếu project không bật jackpot:
+
+```text
+Không cần gửi UPDATE_POT_MAHJONG2.
+INFO/RESULT có thể trả jackpot.enabled = false.
 ```
 
 ---
 
-## 17. AUTO_PLAY_MAHJONG2
-
-### Client → Server
+# 23. BIG_WIN_MAHJONG2
 
 ```json
 {
-  "cmd": 2005,
+  "cmd": 4010,
+  "roomId": 1,
+  "nickname": "playerA",
+  "amount": 5000000,
+  "type": "BIG_WIN"
+}
+```
+
+Nếu là jackpot:
+
+```json
+{
+  "cmd": 4010,
+  "roomId": 1,
+  "nickname": "playerA",
+  "amount": 12000000,
+  "type": "JACKPOT"
+}
+```
+
+---
+
+# 24. AUTO_PLAY_MAHJONG2
+
+## Client → Server
+
+```json
+{
+  "cmd": 4006,
+  "sessionToken": "SESSION_TOKEN",
   "roomId": 1,
   "betSize": 2.5,
   "betLevel": 9,
@@ -878,7 +1046,7 @@ Không tự giả định có JP symbol trên reels nếu luật/asset không x�
 }
 ```
 
-### Server → Client
+## Server → Client
 
 Server trả nhiều result liên tiếp:
 
@@ -897,34 +1065,37 @@ Mỗi result có:
 }
 ```
 
+Nếu gặp pending settlement hoặc không đủ tiền, backend trả `FORCE_STOP_AUTO_MAHJONG2`.
+
 ---
 
-## 18. STOP_AUTO_PLAY_MAHJONG2
+# 25. STOP_AUTO_PLAY_MAHJONG2
 
-### Client → Server
+## Client → Server
 
 ```json
 {
-  "cmd": 2006
+  "cmd": 4007,
+  "sessionToken": "SESSION_TOKEN"
 }
 ```
 
-### Server → Client
+## Server → Client
 
 ```json
 {
-  "cmd": 3005,
+  "cmd": 4008,
   "reason": "USER_STOP"
 }
 ```
 
 ---
 
-## 19. FORCE_STOP_AUTO_MAHJONG2
+# 26. FORCE_STOP_AUTO_MAHJONG2
 
 ```json
 {
-  "cmd": 3005,
+  "cmd": 4008,
   "reason": "NOT_ENOUGH_MONEY"
 }
 ```
@@ -939,24 +1110,27 @@ Các reason:
 | `INVALID_ROOM`      | Room không hợp lệ                           |
 | `SESSION_EXPIRED`   | Session hết hạn                             |
 | `FREE_SPIN_ENTERED` | Dừng auto để vào Free Spin nếu game yêu cầu |
+| `SETTLE_PENDING`    | Dừng auto vì payout đang xử lý              |
+| `JACKPOT_PENDING`   | Dừng auto vì jackpot payout đang xử lý      |
 
 ---
 
-## 20. MINIMIZE_MAHJONG2
+# 27. MINIMIZE_MAHJONG2
 
-### Client → Server
+## Client → Server
 
 ```json
 {
-  "cmd": 2007
+  "cmd": 4013,
+  "sessionToken": "SESSION_TOKEN"
 }
 ```
 
-### Server → Client
+## Server → Client
 
 ```json
 {
-  "cmd": 3006,
+  "cmd": 4014,
   "result": {
     "spinId": "SPIN_10005",
     "totalWin": 1200,
@@ -973,13 +1147,14 @@ Các reason:
 
 ---
 
-## 21. HISTORY_MAHJONG2
+# 28. HISTORY_MAHJONG2
 
-### Client → Server
+## Client → Server
 
 ```json
 {
-  "cmd": 2008,
+  "cmd": 4015,
+  "sessionToken": "SESSION_TOKEN",
   "fromDate": "2026-05-01",
   "toDate": "2026-05-18",
   "page": 1,
@@ -987,23 +1162,25 @@ Các reason:
 }
 ```
 
-### Server → Client
+## Server → Client
 
 ```json
 {
-  "cmd": 3007,
+  "cmd": 4016,
   "page": 1,
   "size": 20,
   "total": 100,
   "items": [
     {
       "spinId": "SPIN_10001",
+      "roundId": "RND_MW2_SPIN_10001",
       "time": "2026-05-18T10:30:00",
       "roomId": 1,
       "totalBet": 450,
       "totalWin": 1800,
       "mode": "BASE",
-      "isJackpot": false
+      "isJackpot": false,
+      "payoutStatus": "SUCCESS"
     }
   ]
 }
@@ -1011,17 +1188,18 @@ Các reason:
 
 ---
 
-## 22. UNSUBSCRIBE_MAHJONG2
+# 29. UNSUBSCRIBE_MAHJONG2
 
-### Client → Server
+## Client → Server
 
 ```json
 {
-  "cmd": 2002
+  "cmd": 4004,
+  "sessionToken": "SESSION_TOKEN"
 }
 ```
 
-### Server xử lý
+## Server xử lý
 
 ```text
 remove player khỏi room
@@ -1029,24 +1207,25 @@ stop auto nếu đang chạy
 save free spin state nếu còn
 ```
 
-### Server → Client
+## Server → Client
 
 ```json
 {
-  "cmd": 2002,
+  "cmd": 4004,
   "success": true
 }
 ```
 
 ---
 
-## 23. ERROR response
+# 30. ERROR response
 
 ```json
 {
   "cmd": 3999,
   "errorCode": 1001,
-  "message": "NOT_ENOUGH_MONEY"
+  "message": "NOT_ENOUGH_MONEY",
+  "balance": 100000
 }
 ```
 
@@ -1060,71 +1239,99 @@ save free spin state nếu còn
 |       1006 | `INVALID_STATE`             |
 |       1007 | `AUTO_PLAY_ALREADY_RUNNING` |
 |       1008 | `NO_FREE_SPIN_AVAILABLE`    |
+|       1009 | `SETTLE_PENDING`            |
+|       1010 | `JACKPOT_PENDING`           |
 
 ---
 
-## 24. Flow tóm tắt theo backend
+# 31. Frontend balance rule
 
-### Subscribe flow
+Frontend chỉ được update balance bằng:
 
 ```text
-Client 2001 SUBSCRIBE
-↓
-Server 3001 INFO
-↓
-Server 3003 UPDATE_POT nếu jackpot.enabled = true
+INFO_MAHJONG2.playerState.balance
+RESULT_MAHJONG2.balance
+ERROR.balance nếu backend có trả
 ```
 
-### Play flow
+Frontend không được:
 
 ```text
-Client 2004 PLAY
-↓
-Backend validate balance
-↓
-Backend generate reels 4-5-5-5-4
-↓
-Backend calculate ways
-↓
-Backend process cascade
-↓
-Backend process goldenTransforms
-↓
-Backend process freeSpin
-↓
-Backend process jackpot nếu bật
-↓
-Server 3002 RESULT
-↓
-Server 3003 UPDATE_POT nếu pot đổi
-↓
-Server 3004 BIG_WIN nếu đủ điều kiện
+tự trừ balance khi bấm PLAY
+tự cộng balance khi thấy totalWin
+tự reset balance theo local calculation
 ```
 
-### Auto play flow
+Vì balance thật được xử lý qua SeamlessWallet.
+
+---
+
+# 32. Flow tóm tắt theo frontend
+
+## Subscribe flow
 
 ```text
-Client 2005 AUTO_PLAY
+Client 4003 SUBSCRIBE(sessionToken)
 ↓
-Server 3002 RESULT
+Backend /game/wallet getBalance
 ↓
-Server 3002 RESULT
+Server 4009 INFO(balance, config)
 ↓
-Server 3002 RESULT
-↓
-Client 2006 STOP hoặc Server 3005 FORCE_STOP
+Server 4002 UPDATE_POT nếu jackpot.enabled = true
 ```
 
-### Free spin flow
+## Play flow
 
 ```text
-Server 3002 RESULT
+Client 4001 PLAY(sessionToken, bet)
+↓
+Backend /game/wallet bet
+↓
+Nếu bet fail:
+    Server 3999 ERROR
+↓
+Nếu bet success:
+    Backend RNG / ways / cascade / freeSpin / jackpot
+    Backend /game/wallet settle
+    Nếu có jackpot: Backend /game/wallet jackpotWin
+↓
+Server 4001 RESULT
+↓
+Server 4002 UPDATE_POT nếu pot đổi
+↓
+Server 4010 BIG_WIN nếu đủ điều kiện
+```
+
+## Auto play flow
+
+```text
+Client 4006 AUTO_PLAY
+↓
+Server 4001 RESULT
+↓
+Server 4001 RESULT
+↓
+Server 4001 RESULT
+↓
+Client 4007 STOP
+hoặc
+Server 4008 FORCE_STOP
+```
+
+## Free Spin flow
+
+```text
+Server 4001 RESULT
 freeSpin.triggered = true
 state.mode = FREE_SPIN
 ↓
-Client tiếp tục PLAY hoặc server tự consume tùy thiết kế
+Client tiếp tục 4001 PLAY
 ↓
-Server 3002 RESULT mode FREE_SPIN
+Backend không gọi bet mới
+↓
+Backend xử lý Free Spin
+↓
+Server 4001 RESULT mode FREE_SPIN
 ↓
 freeSpin.remaining giảm dần
 ↓
@@ -1135,7 +1342,7 @@ Kết thúc: state.mode = BASE
 
 ---
 
-## 25. Không tạo command riêng cho cascade/golden
+# 33. Không tạo command riêng cho cascade/golden
 
 Không cần:
 
@@ -1157,22 +1364,24 @@ Frontend tự chạy animation queue từ `RESULT`.
 
 ---
 
-## 26. Kết luận
+# 34. Kết luận
 
-Bản command/response này bám sát:
+Bản command/response này bám theo backend mới:
 
 ```text
-luật chơi Mahjong Ways 2
-backend xử lý toàn bộ gameplay
-frontend chỉ render theo RESULT payload
+Frontend gửi sessionToken.
+Backend gọi /game/wallet.
+Base Spin: bet → RNG → settle → jackpotWin nếu có.
+RESULT có roundId + seamless status.
+Balance chỉ update từ INFO/RESULT/ERROR.
+Không tự giả định BONUS hoặc JP symbol trên reels.
+Không split cascade/golden/freeSpin thành command riêng.
 ```
 
-Các điểm quan trọng nhất:
+Điểm quan trọng nhất cho frontend:
 
 ```text
-INFO trả gameConfig/symbol/rule
-PLAY trả RESULT đầy đủ
-RESULT chứa reels + cascadeSteps + goldenTransforms + freeSpin + jackpot optional
-Không split cascade/golden thành nhiều socket command
-Không giả định BONUS hoặc JP symbol trên reels
+Frontend chỉ render.
+Backend xử lý tiền và gameplay.
+Balance trong UI lấy từ response, không tự tính.
 ```
