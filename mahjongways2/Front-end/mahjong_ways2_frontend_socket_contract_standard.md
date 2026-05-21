@@ -104,7 +104,7 @@ FE chỉ gửi token.
 | `4015` | `HISTORY_MAHJONG2`        | Có                   | `4016`             |
 | `3999` | `ERROR`                   | BE trả lỗi           | -                  |
 
-Các cmd có trong `Mahjong2CommandIds` nhưng không thấy handler thực tế cho FE:
+Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
 
 ```txt
 4002 UPDATE_POT_MAHJONG2
