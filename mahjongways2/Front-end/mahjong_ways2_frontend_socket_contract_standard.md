@@ -1,4 +1,3 @@
----
 # Mahjong Ways 2 — Frontend Socket Contract
 
 ## 1. Kết nối WebSocket
@@ -40,7 +39,7 @@ Sau khi `onopen`, frontend gửi command `4003` để subscribe game.
 
 ## 3. Common request rule
 
-### 3.1 Mọi request phải có `cmd`
+### 3.1. Mọi request phải có `cmd`
 
 Nếu thiếu `cmd`, backend trả lỗi:
 
@@ -54,7 +53,7 @@ Nếu thiếu `cmd`, backend trả lỗi:
 }
 ```
 
-### 3.2 Token field được backend nhận
+### 3.2. Token field được backend nhận
 
 Source `Mahjong2SocketRequestMapper` nhận 3 field:
 
@@ -82,7 +81,7 @@ Hoặc:
 }
 ```
 
-### 3.3 FE không cần gửi `userId`, `currency`
+### 3.3. FE không cần gửi `userId`, `currency`
 
 Backend lấy `userId` và `currency` từ session token.
 
@@ -92,7 +91,7 @@ FE chỉ gửi token.
 
 ## 4. Command list
 
-|    CMD | Tên                       | FE gửi?              | Response           |
+| CMD    | Tên                       | FE gửi?              | Response           |
 | -----: | ------------------------- | -------------------- | ------------------ |
 | `4001` | `PLAY_MAHJONG2`           | Có                   | `4001` hoặc `3999` |
 | `4003` | `SUBSCRIBE_MAHJONG2`      | Có                   | `4009`             |
@@ -127,8 +126,6 @@ Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
 ```
 
 `roomId` optional. Nếu không gửi hoặc `roomId <= 0`, backend chọn default room.
-
----
 
 ### Response BE trả — cmd `4009`
 
@@ -357,15 +354,15 @@ Nếu `roomId` không tồn tại hoặc room disabled:
 
 ### Field request
 
-| Field             | Bắt buộc | Ý nghĩa                                     |
-| ----------------- | -------: | ------------------------------------------- |
-| `cmd`             |       Có | Luôn `4001`                                 |
-| `clientRequestId` |       Có | Idempotency key, mỗi spin mới phải unique   |
-| `sessionToken`    |       Có | Token user                                  |
-| `roomId`          |       Có | Room đang chơi                              |
-| `betOptionId`     |       Có | Mức cược lấy từ `betOptions`                |
-| `turbo`           |    Không | Default `false`                             |
-| `gameCode`        |    Không | Nếu không gửi backend dùng `MAHJONG_WAYS_2` |
+| Field             | Bắt buộc | Ý nghĩa                                   |
+| ----------------- | -------: | ----------------------------------------- |
+| `cmd`             | Có       | Luôn `4001`                               |
+| `clientRequestId` | Có       | Idempotency key, mỗi spin mới phải unique |
+| `sessionToken`    | Có       | Token user                                |
+| `roomId`          | Có       | Room đang chơi                            |
+| `betOptionId`     | Có       | Mức cược lấy từ `betOptions`              |
+| `turbo`           | Không    | Default `false`                           |
+| `gameCode`        | Không    | Nếu không gửi backend dùng `MAHJONG_WAYS_2` |
 
 ### Các field FE không được gửi khi spin
 
@@ -882,8 +879,6 @@ page / size không được hỗ trợ
 
 Nếu gửi `page` hoặc `size` sẽ lỗi.
 
----
-
 ### Response — cmd `4016`
 
 ```json
@@ -920,12 +915,12 @@ Nếu gửi `page` hoặc `size` sẽ lỗi.
 
 ### Giải thích field
 
-| Field            | Ý nghĩa                                  |
-| ---------------- | ---------------------------------------- |
-| `cmd`            | `4016`                                   |
-| `limit`          | Limit backend dùng sau khi clamp 1–50    |
-| `pagination`     | Luôn `"limit"`                           |
-| `items`          | Danh sách lịch sử spin                   |
+| Field            | Ý nghĩa                               |
+| ---------------- | ------------------------------------- |
+| `cmd`            | `4016`                                |
+| `limit`          | Limit backend dùng sau khi clamp 1–50 |
+| `pagination`     | Luôn `"limit"`                        |
+| `items`          | Danh sách lịch sử spin                |
 | `items[].result` | Snapshot `ResultMahjong2Response` đã lưu |
 
 ---
@@ -1084,7 +1079,7 @@ Nếu lỗi có liên quan spin pending/duplicate, có thể có thêm:
 | Wallet lỗi cần review            | `FAILED_NEED_REVIEW`            |
 | Internal error                   | `INTERNAL_ERROR`                |
 
-### 18.1 Unknown command
+### 18.1. Unknown command
 
 Request:
 
@@ -1107,7 +1102,7 @@ Response:
 }
 ```
 
-### 18.2 Invalid session token
+### 18.2. Invalid session token
 
 Response:
 
@@ -1121,7 +1116,7 @@ Response:
 }
 ```
 
-### 18.3 Invalid room
+### 18.3. Invalid room
 
 Response:
 
@@ -1135,7 +1130,7 @@ Response:
 }
 ```
 
-### 18.4 Invalid bet option
+### 18.4. Invalid bet option
 
 Response:
 
@@ -1149,7 +1144,7 @@ Response:
 }
 ```
 
-### 18.5 Insufficient balance
+### 18.5. Insufficient balance
 
 Response:
 
@@ -1163,7 +1158,7 @@ Response:
 }
 ```
 
-### 18.6 Bet pending
+### 18.6. Bet pending
 
 Response:
 
@@ -1180,7 +1175,7 @@ Response:
 }
 ```
 
-### 18.7 Settle pending
+### 18.7. Settle pending
 
 Response:
 
@@ -1197,7 +1192,7 @@ Response:
 }
 ```
 
-### 18.8 Failed need review
+### 18.8. Failed need review
 
 Response:
 
@@ -1340,6 +1335,3 @@ socket.send(JSON.stringify({
   sessionToken: token
 }));
 ```
-
----
-
