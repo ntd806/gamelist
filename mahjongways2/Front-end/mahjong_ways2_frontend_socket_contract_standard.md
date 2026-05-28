@@ -1473,88 +1473,21 @@ socket.send(JSON.stringify({
 
 
 ## sample response 4001 có ăn line/ways và có cascade sập xuống
+---
+
+# Response `4001` mới — FE-only animation contract
+
+```json
 {
   "cmd": 4001,
-  "spinId": "SPIN_SAMPLE_WIN_CASCADE_001",
-  "roundId": "RND_MW2_SPIN_SAMPLE_WIN_CASCADE_001",
+  "spinId": "SPIN_SAMPLE_001",
+  "roundId": "RND_MW2_SPIN_SAMPLE_001",
   "roomId": 1,
-  "reels": [
-    [
-      { "symbol": "ITEM_1", "golden": false },
-      { "symbol": "ITEM_4", "golden": false },
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_6", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_1", "golden": true },
-      { "symbol": "ITEM_2", "golden": false },
-      { "symbol": "ITEM_3", "golden": false },
-      { "symbol": "ITEM_4", "golden": false },
-      { "symbol": "ITEM_5", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_1", "golden": false },
-      { "symbol": "ITEM_7", "golden": false },
-      { "symbol": "ITEM_6", "golden": false },
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_4", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_2", "golden": false },
-      { "symbol": "ITEM_3", "golden": false },
-      { "symbol": "ITEM_4", "golden": false },
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_6", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_7", "golden": false },
-      { "symbol": "ITEM_6", "golden": false },
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_4", "golden": false }
-    ]
-  ],
-  "animationReels": [
-    [
-      { "symbol": "ITEM_7", "displayOnly": true },
-      { "symbol": "ITEM_1", "displayOnly": false },
-      { "symbol": "ITEM_4", "displayOnly": false },
-      { "symbol": "ITEM_5", "displayOnly": false },
-      { "symbol": "ITEM_6", "displayOnly": false },
-      { "symbol": "ITEM_3", "displayOnly": true }
-    ],
-    [
-      { "symbol": "ITEM_1", "displayOnly": false },
-      { "symbol": "ITEM_2", "displayOnly": false },
-      { "symbol": "ITEM_3", "displayOnly": false },
-      { "symbol": "ITEM_4", "displayOnly": false },
-      { "symbol": "ITEM_5", "displayOnly": false }
-    ],
-    [
-      { "symbol": "ITEM_1", "displayOnly": false },
-      { "symbol": "ITEM_7", "displayOnly": false },
-      { "symbol": "ITEM_6", "displayOnly": false },
-      { "symbol": "ITEM_5", "displayOnly": false },
-      { "symbol": "ITEM_4", "displayOnly": false }
-    ],
-    [
-      { "symbol": "ITEM_2", "displayOnly": false },
-      { "symbol": "ITEM_3", "displayOnly": false },
-      { "symbol": "ITEM_4", "displayOnly": false },
-      { "symbol": "ITEM_5", "displayOnly": false },
-      { "symbol": "ITEM_6", "displayOnly": false }
-    ],
-    [
-      { "symbol": "ITEM_2", "displayOnly": true },
-      { "symbol": "ITEM_7", "displayOnly": false },
-      { "symbol": "ITEM_6", "displayOnly": false },
-      { "symbol": "ITEM_5", "displayOnly": false },
-      { "symbol": "ITEM_4", "displayOnly": false },
-      { "symbol": "ITEM_1", "displayOnly": true }
-    ]
-  ],
+
   "animationMeta": {
     "mathLayout": [4, 5, 5, 5, 4],
     "displayLayout": [6, 5, 5, 5, 6],
+    "rowOrder": "TOP_TO_BOTTOM",
     "displayOnlyPositions": [
       { "col": 0, "row": 0 },
       { "col": 0, "row": 5 },
@@ -1562,235 +1495,992 @@ socket.send(JSON.stringify({
       { "col": 4, "row": 5 }
     ]
   },
+
+  "animationReels": [
+    [
+      { "cellId": "s0-c0-buffer-top", "symbol": "ITEM_5", "displayOnly": true, "golden": false, "source": "BUFFER" },
+      { "cellId": "s0-c0-r1", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c0-r2", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c0-r3", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c0-r4", "symbol": "ITEM_7", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c0-buffer-bottom", "symbol": "ITEM_7", "displayOnly": true, "golden": false, "source": "BUFFER" }
+    ],
+    [
+      { "cellId": "s0-c1-r0", "symbol": "ITEM_1", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c1-r1", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c1-r2", "symbol": "ITEM_6", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c1-r3", "symbol": "ITEM_7", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c1-r4", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" }
+    ],
+    [
+      { "cellId": "s0-c2-r0", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c2-r1", "symbol": "ITEM_7", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c2-r2", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c2-r3", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c2-r4", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" }
+    ],
+    [
+      { "cellId": "s0-c3-r0", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c3-r1", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c3-r2", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c3-r3", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c3-r4", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" }
+    ],
+    [
+      { "cellId": "s0-c4-buffer-top", "symbol": "ITEM_2", "displayOnly": true, "golden": false, "source": "BUFFER" },
+      { "cellId": "s0-c4-r1", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c4-r2", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c4-r3", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c4-r4", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+      { "cellId": "s0-c4-buffer-bottom", "symbol": "ITEM_3", "displayOnly": true, "golden": false, "source": "BUFFER" }
+    ]
+  ],
+
   "cascadeSteps": [
     {
       "step": 1,
       "mode": "BASE",
-      "multiplier": 1,
-      "reelsBefore": [
-        [
-          { "symbol": "ITEM_1", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_1", "golden": true },
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_1", "golden": false },
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ]
-      ],
+      "multiplier": 3,
+      "stepWin": 675,
+
       "animationReelsBeforeDrop": [
         [
-          { "symbol": "ITEM_7", "displayOnly": true },
-          { "symbol": "ITEM_1", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false },
-          { "symbol": "ITEM_3", "displayOnly": true }
+          { "cellId": "s1-c0-buffer-top", "symbol": "ITEM_5", "displayOnly": true, "golden": false, "source": "BUFFER" },
+          { "cellId": "s1-c0-r1", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c0-r2", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c0-r3", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c0-r4", "symbol": "ITEM_7", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c0-buffer-bottom", "symbol": "ITEM_7", "displayOnly": true, "golden": false, "source": "BUFFER" }
         ],
         [
-          { "symbol": "ITEM_1", "displayOnly": false },
-          { "symbol": "ITEM_2", "displayOnly": false },
-          { "symbol": "ITEM_3", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false }
+          { "cellId": "s1-c1-r0", "symbol": "ITEM_1", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c1-r1", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c1-r2", "symbol": "ITEM_6", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c1-r3", "symbol": "ITEM_7", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c1-r4", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" }
         ],
         [
-          { "symbol": "ITEM_1", "displayOnly": false },
-          { "symbol": "ITEM_7", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false }
+          { "cellId": "s1-c2-r0", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c2-r1", "symbol": "ITEM_7", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c2-r2", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c2-r3", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c2-r4", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" }
         ],
         [
-          { "symbol": "ITEM_2", "displayOnly": false },
-          { "symbol": "ITEM_3", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false }
+          { "cellId": "s1-c3-r0", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r1", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r2", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r3", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r4", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" }
         ],
         [
-          { "symbol": "ITEM_2", "displayOnly": true },
-          { "symbol": "ITEM_7", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_1", "displayOnly": true }
+          { "cellId": "s1-c4-buffer-top", "symbol": "ITEM_2", "displayOnly": true, "golden": false, "source": "BUFFER" },
+          { "cellId": "s1-c4-r1", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c4-r2", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c4-r3", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c4-r4", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c4-buffer-bottom", "symbol": "ITEM_3", "displayOnly": true, "golden": false, "source": "BUFFER" }
         ]
       ],
-      "wins": [
+
+      "visualWins": [
         {
-          "symbol": "ITEM_1",
+          "symbol": "ITEM_7",
           "matchedReels": 3,
           "ways": 1,
-          "payTableValue": 2,
-          "lineBet": 22.5,
-          "multiplier": 1,
-          "winAmount": 45,
+          "winAmount": 675,
           "positions": [
-            { "reel": 0, "row": 0 },
-            { "reel": 1, "row": 0 },
-            { "reel": 2, "row": 0 }
+            { "col": 0, "row": 4, "cellId": "s1-c0-r4" },
+            { "col": 1, "row": 3, "cellId": "s1-c1-r3" },
+            { "col": 2, "row": 1, "cellId": "s1-c2-r1" }
           ]
         }
       ],
-      "removedPositions": [
-        { "reel": 0, "row": 0 },
-        { "reel": 2, "row": 0 }
+
+      "animationRemovedPositions": [
+        { "col": 0, "row": 4, "cellId": "s1-c0-r4" },
+        { "col": 1, "row": 3, "cellId": "s1-c1-r3" },
+        { "col": 2, "row": 1, "cellId": "s1-c2-r1" }
       ],
-      "goldenTransforms": [
+
+      "animationDropMap": [
         {
-          "position": { "reel": 1, "row": 0 },
-          "from": { "symbol": "ITEM_1", "golden": true },
-          "to": { "symbol": "WILD", "golden": false }
+          "cellId": "s1-c0-r1",
+          "symbol": "ITEM_5",
+          "golden": false,
+          "from": { "col": 0, "row": 1 },
+          "to": { "col": 0, "row": 2 }
+        },
+        {
+          "cellId": "s1-c0-r2",
+          "symbol": "ITEM_2",
+          "golden": false,
+          "from": { "col": 0, "row": 2 },
+          "to": { "col": 0, "row": 3 }
+        },
+        {
+          "cellId": "s1-c0-r3",
+          "symbol": "ITEM_5",
+          "golden": false,
+          "from": { "col": 0, "row": 3 },
+          "to": { "col": 0, "row": 4 }
+        },
+        {
+          "cellId": "s1-c1-r0",
+          "symbol": "ITEM_1",
+          "golden": false,
+          "from": { "col": 1, "row": 0 },
+          "to": { "col": 1, "row": 1 }
+        },
+        {
+          "cellId": "s1-c1-r1",
+          "symbol": "ITEM_3",
+          "golden": false,
+          "from": { "col": 1, "row": 1 },
+          "to": { "col": 1, "row": 2 }
+        },
+        {
+          "cellId": "s1-c1-r2",
+          "symbol": "ITEM_6",
+          "golden": false,
+          "from": { "col": 1, "row": 2 },
+          "to": { "col": 1, "row": 3 }
+        },
+        {
+          "cellId": "s1-c1-r4",
+          "symbol": "ITEM_4",
+          "golden": false,
+          "from": { "col": 1, "row": 4 },
+          "to": { "col": 1, "row": 4 }
+        },
+        {
+          "cellId": "s1-c2-r0",
+          "symbol": "ITEM_2",
+          "golden": false,
+          "from": { "col": 2, "row": 0 },
+          "to": { "col": 2, "row": 1 }
+        },
+        {
+          "cellId": "s1-c2-r2",
+          "symbol": "ITEM_5",
+          "golden": false,
+          "from": { "col": 2, "row": 2 },
+          "to": { "col": 2, "row": 2 }
+        },
+        {
+          "cellId": "s1-c2-r3",
+          "symbol": "ITEM_2",
+          "golden": false,
+          "from": { "col": 2, "row": 3 },
+          "to": { "col": 2, "row": 3 }
+        },
+        {
+          "cellId": "s1-c2-r4",
+          "symbol": "ITEM_4",
+          "golden": false,
+          "from": { "col": 2, "row": 4 },
+          "to": { "col": 2, "row": 4 }
         }
       ],
-      "reelsAfterDrop": [
-        [
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "WILD", "golden": false },
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ]
+
+      "animationNewSymbols": [
+        {
+          "cellId": "s1-new-c0-r1",
+          "symbol": "ITEM_1",
+          "golden": false,
+          "to": { "col": 0, "row": 1 },
+          "enterFrom": { "col": 0, "row": 0 }
+        },
+        {
+          "cellId": "s1-new-c1-r0",
+          "symbol": "ITEM_5",
+          "golden": false,
+          "to": { "col": 1, "row": 0 },
+          "enterFrom": { "col": 1, "row": -1 }
+        },
+        {
+          "cellId": "s1-new-c2-r0",
+          "symbol": "ITEM_1",
+          "golden": false,
+          "to": { "col": 2, "row": 0 },
+          "enterFrom": { "col": 2, "row": -1 }
+        }
       ],
+
+      "visualGoldenTransforms": [],
+
       "animationReelsAfterDrop": [
         [
-          { "symbol": "ITEM_2", "displayOnly": true },
-          { "symbol": "ITEM_7", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false },
-          { "symbol": "ITEM_3", "displayOnly": true }
+          { "cellId": "s1-after-c0-buffer-top", "symbol": "ITEM_1", "displayOnly": true, "golden": false, "source": "BUFFER" },
+          { "cellId": "s1-new-c0-r1", "symbol": "ITEM_1", "displayOnly": false, "golden": false, "source": "NEW" },
+          { "cellId": "s1-c0-r1", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c0-r2", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c0-r3", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-after-c0-buffer-bottom", "symbol": "ITEM_5", "displayOnly": true, "golden": false, "source": "BUFFER" }
         ],
         [
-          { "symbol": "WILD", "displayOnly": false },
-          { "symbol": "ITEM_2", "displayOnly": false },
-          { "symbol": "ITEM_3", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false }
+          { "cellId": "s1-new-c1-r0", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "NEW" },
+          { "cellId": "s1-c1-r0", "symbol": "ITEM_1", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c1-r1", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c1-r2", "symbol": "ITEM_6", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c1-r4", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" }
         ],
         [
-          { "symbol": "ITEM_6", "displayOnly": false },
-          { "symbol": "ITEM_7", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false }
+          { "cellId": "s1-new-c2-r0", "symbol": "ITEM_1", "displayOnly": false, "golden": false, "source": "NEW" },
+          { "cellId": "s1-c2-r0", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c2-r2", "symbol": "ITEM_5", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c2-r3", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c2-r4", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" }
         ],
         [
-          { "symbol": "ITEM_2", "displayOnly": false },
-          { "symbol": "ITEM_3", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false }
+          { "cellId": "s1-c3-r0", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r1", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r2", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r3", "symbol": "ITEM_4", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c3-r4", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" }
         ],
         [
-          { "symbol": "ITEM_2", "displayOnly": true },
-          { "symbol": "ITEM_7", "displayOnly": false },
-          { "symbol": "ITEM_6", "displayOnly": false },
-          { "symbol": "ITEM_5", "displayOnly": false },
-          { "symbol": "ITEM_4", "displayOnly": false },
-          { "symbol": "ITEM_1", "displayOnly": true }
+          { "cellId": "s1-after-c4-buffer-top", "symbol": "ITEM_2", "displayOnly": true, "golden": false, "source": "BUFFER" },
+          { "cellId": "s1-c4-r1", "symbol": "ITEM_2", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c4-r2", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c4-r3", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-c4-r4", "symbol": "ITEM_3", "displayOnly": false, "golden": false, "source": "MATH" },
+          { "cellId": "s1-after-c4-buffer-bottom", "symbol": "ITEM_3", "displayOnly": true, "golden": false, "source": "BUFFER" }
         ]
-      ],
-      "animationMeta": {
-        "mathLayout": [4, 5, 5, 5, 4],
-        "displayLayout": [6, 5, 5, 5, 6],
-        "displayOnlyPositions": [
-          { "col": 0, "row": 0 },
-          { "col": 0, "row": 5 },
-          { "col": 4, "row": 0 },
-          { "col": 4, "row": 5 }
-        ]
-      },
-      "stepWin": 45
+      ]
     }
   ],
-  "totalWin": 45,
-  "balance": 999595,
+
+  "totalWin": 675,
+  "balance": 1000225,
+
   "bet": {
     "roomId": 1,
     "betOptionId": "R1_BS_250_BL_9",
-    "betSize": 2.5,
-    "betLevel": 9,
-    "baseBet": 20,
-    "lineBet": 22.5,
     "totalBet": 450
   },
+
   "seamless": {
     "enabled": true,
-    "betTransactionId": "BET_RND_MW2_SPIN_SAMPLE_WIN_CASCADE_001",
-    "settleTransactionId": "SETTLE_RND_MW2_SPIN_SAMPLE_WIN_CASCADE_001",
     "payoutStatus": "SUCCESS"
   },
+
   "freeSpin": {
     "triggered": false,
     "awarded": 0,
     "remaining": 0,
-    "retriggered": false,
     "scatterCount": 0
   },
+
   "jackpot": {
     "enabled": false,
     "triggered": false,
-    "jackpotId": null,
     "amount": 0
   },
+
   "state": {
     "mode": "BASE",
-    "pot": 1200000,
     "bigWin": false,
     "turbo": false,
     "autoPlay": false
   },
-  "clientRequestId": "sample-win-cascade-001"
+
+  "clientRequestId": "sample-fe-only-001"
 }
+```
+
+## Những field không trả cho frontend nữa
+
+Không trả trong response FE:
+
+```txt
+reels
+cascadeSteps[].reelsBefore
+cascadeSteps[].reelsAfterDrop
+cascadeSteps[].removedPositions
+cascadeSteps[].goldenTransforms
+wins.positions theo math coordinate
+mathPosition nếu FE không cần debug
+betSize / betLevel / baseBet / lineBet nếu UI không cần hiển thị chi tiết
+betTransactionId / settleTransactionId nếu FE không cần debug giao dịch
+state.pot nếu chưa hiển thị hũ
+```
+
+Các field này backend vẫn nên lưu ở:
+
+```txt
+history
+debug log
+game_round_results
+audit/reconciliation
+```
+
+## FE sẽ diễn animation bằng field nào?
+
+FE chỉ cần dùng:
+
+```txt
+animationReels
+cascadeSteps[].animationReelsBeforeDrop
+cascadeSteps[].visualWins
+cascadeSteps[].animationRemovedPositions
+cascadeSteps[].animationDropMap
+cascadeSteps[].animationNewSymbols
+cascadeSteps[].visualGoldenTransforms
+cascadeSteps[].animationReelsAfterDrop
+```
+
+## Ý nghĩa flow FE
+
+```txt
+1. Render animationReels ban đầu.
+2. Với mỗi cascade step:
+   - render animationReelsBeforeDrop
+   - highlight visualWins.positions
+   - xóa animationRemovedPositions
+   - cho item cũ rơi theo animationDropMap
+   - cho item mới vào theo animationNewSymbols
+   - chạy visualGoldenTransforms nếu có
+   - snap về animationReelsAfterDrop
+3. Hiển thị totalWin và balance.
+```
+
+Dưới đây là cách hiểu **từng field trong response `4001` mới theo hướng FE-only animation contract**.
+
+## 1. Nhóm định danh response
+
+```json
+"cmd": 4001
+```
+
+Mã response của lệnh spin. `4001` nghĩa là backend trả kết quả một lượt quay.
+
+```json
+"spinId": "SPIN_SAMPLE_001"
+```
+
+ID riêng của lượt spin. FE thường không cần dùng để render, nhưng có thể dùng để log/debug.
+
+```json
+"roundId": "RND_MW2_SPIN_SAMPLE_001"
+```
+
+ID round xử lý tiền. Backend dùng cho bet/settle/history. FE có thể bỏ qua nếu không cần debug.
+
+```json
+"roomId": 1
+```
+
+Room mà người chơi đang chơi.
+
+---
+
+## 2. `animationMeta`
+
+```json
+"animationMeta": {
+  "mathLayout": [4, 5, 5, 5, 4],
+  "displayLayout": [6, 5, 5, 5, 6],
+  "rowOrder": "TOP_TO_BOTTOM",
+  "displayOnlyPositions": [
+    { "col": 0, "row": 0 },
+    { "col": 0, "row": 5 },
+    { "col": 4, "row": 0 },
+    { "col": 4, "row": 5 }
+  ]
+}
+```
+
+Đây là metadata layout.
+
+```txt
+mathLayout = layout thật backend dùng để tính game.
+displayLayout = layout FE dùng để render animation.
+rowOrder = thứ tự row trong từng cột.
+displayOnlyPositions = các ô chỉ để hiển thị, không tính win.
+```
+
+Nghĩa là:
+
+```txt
+Math thật: 4-5-5-5-4
+Visual FE render: 6-5-5-5-6
+```
+
+Cột 1 và cột 5 có thêm 2 ô đệm:
+
+```txt
+row 0 = buffer trên
+row cuối = buffer dưới
+```
+
+---
+
+## 3. `animationReels`
+
+```json
+"animationReels": [...]
+```
+
+Đây là **board visual ban đầu của spin**, trước khi xử lý cascade.
+
+FE dùng field này để render màn hình sau khi guồng dừng.
+
+Layout:
+
+```txt
+animationReels[0] = cột 1
+animationReels[1] = cột 2
+animationReels[2] = cột 3
+animationReels[3] = cột 4
+animationReels[4] = cột 5
+```
+
+Trong mỗi cột, row đi theo:
+
+```txt
+trên xuống dưới
+```
+
+Mỗi cell có dạng:
+
+```json
+{
+  "cellId": "s0-c0-r1",
+  "symbol": "ITEM_5",
+  "displayOnly": false,
+  "golden": false,
+  "source": "SYMBOL"
+}
+```
+
+Ý nghĩa:
+
+```txt
+cellId = ID duy nhất của cell để FE tracking item.
+symbol = mã item cần render.
+displayOnly = true nếu chỉ là ô đệm visual, không tính win.
+golden = true nếu item là golden.
+source = loại cell: SYMBOL / BUFFER / NEW.
+```
+
+Nên dùng `source: "SYMBOL"` thay vì `source: "MATH"` trong response FE-only để tránh FE hiểu nhầm.
+
+---
+
+## 4. `cascadeSteps`
+
+```json
+"cascadeSteps": [...]
+```
+
+Danh sách các lần thắng liên hoàn.
+
+Nếu không thắng:
+
+```json
+"cascadeSteps": []
+```
+
+Nếu có thắng/sập xuống, mỗi lần sập là một step:
+
+```txt
+step 1
+step 2
+step 3
+...
+```
+
+FE chạy animation tuần tự từng step.
+
+---
+
+# Bên trong mỗi `cascadeSteps[]`
+
+## 5. `step`
+
+```json
+"step": 1
+```
+
+Số thứ tự cascade.
+
+```txt
+step 1 = lần thắng đầu tiên
+step 2 = sau khi sập xuống vẫn thắng tiếp
+step 3 = tiếp tục thắng tiếp
+```
+
+---
+
+## 6. `mode`
+
+```json
+"mode": "BASE"
+```
+
+Trạng thái game ở step đó.
+
+Có thể là:
+
+```txt
+BASE = game thường
+FREE_SPIN = free spin
+```
+
+---
+
+## 7. `multiplier`
+
+```json
+"multiplier": 3
+```
+
+Hệ số nhân tiền thắng ở step hiện tại.
+
+Ví dụ:
+
+```txt
+BASE step 1: x1
+BASE step 2: x2
+BASE step 3: x3
+BASE step 4 trở đi: x5
+```
+
+---
+
+## 8. `stepWin`
+
+```json
+"stepWin": 675
+```
+
+Tổng tiền thắng của riêng cascade step này.
+
+Nếu có nhiều win trong cùng step, `stepWin` là tổng các win đó.
+
+---
+
+## 9. `animationReelsBeforeDrop`
+
+```json
+"animationReelsBeforeDrop": [...]
+```
+
+Đây là **board visual trước khi remove item thắng**.
+
+FE dùng để:
+
+```txt
+1. render board trước khi nổ
+2. highlight item thắng
+3. chạy hiệu ứng nổ/xóa
+```
+
+Field này thay cho `reelsBefore` trong FE contract mới.
+
+---
+
+## 10. `visualWins`
+
+```json
+"visualWins": [
+  {
+    "symbol": "ITEM_7",
+    "matchedReels": 3,
+    "ways": 1,
+    "winAmount": 675,
+    "positions": [
+      { "col": 0, "row": 4, "cellId": "s1-c0-r4" },
+      { "col": 1, "row": 3, "cellId": "s1-c1-r3" },
+      { "col": 2, "row": 1, "cellId": "s1-c2-r1" }
+    ]
+  }
+]
+```
+
+Đây là thông tin thắng theo **visual coordinate**.
+
+Ý nghĩa:
+
+```txt
+symbol = item thắng
+matchedReels = thắng qua bao nhiêu cột liên tiếp
+ways = số ways thắng
+winAmount = tiền thắng của win này
+positions = vị trí FE cần highlight
+```
+
+FE dùng `visualWins.positions` để highlight item thắng.
+
+Không cần dùng `wins.positions` math nữa.
+
+---
+
+## 11. `animationRemovedPositions`
+
+```json
+"animationRemovedPositions": [
+  { "col": 0, "row": 4, "cellId": "s1-c0-r4" },
+  { "col": 1, "row": 3, "cellId": "s1-c1-r3" },
+  { "col": 2, "row": 1, "cellId": "s1-c2-r1" }
+]
+```
+
+Đây là các item sẽ bị nổ/xóa theo **visual coordinate**.
+
+FE dùng để chạy hiệu ứng:
+
+```txt
+explode / fade out / remove
+```
+
+Quan trọng:
+
+```txt
+animationRemovedPositions dùng col/row visual.
+Không dùng math coordinate.
+Không bao giờ remove displayOnly=true.
+```
+
+---
+
+## 12. `animationDropMap`
+
+```json
+"animationDropMap": [
+  {
+    "cellId": "s1-c0-r1",
+    "symbol": "ITEM_5",
+    "golden": false,
+    "from": { "col": 0, "row": 1 },
+    "to": { "col": 0, "row": 2 }
+  }
+]
+```
+
+Đây là field quan trọng nhất để FE diễn hiệu ứng rơi.
+
+Nó nói rõ:
+
+```txt
+item nào rơi từ đâu tới đâu
+```
+
+Ý nghĩa:
+
+```txt
+cellId = ID item đang rơi
+symbol = item đó là gì
+golden = có phải golden không
+from = vị trí trước khi rơi
+to = vị trí sau khi rơi
+```
+
+Ví dụ:
+
+```txt
+ITEM_5 từ cột 1 row 1 rơi xuống cột 1 row 2
+```
+
+Nhờ `cellId`, nếu có nhiều `ITEM_5` trong cùng cột, FE vẫn biết con nào là con nào.
+
+---
+
+## 13. `animationNewSymbols`
+
+```json
+"animationNewSymbols": [
+  {
+    "cellId": "s1-new-c0-r1",
+    "symbol": "ITEM_1",
+    "golden": false,
+    "to": { "col": 0, "row": 1 },
+    "enterFrom": { "col": 0, "row": 0 }
+  }
+]
+```
+
+Đây là danh sách item mới xuất hiện sau khi các item cũ rơi xuống.
+
+Ý nghĩa:
+
+```txt
+cellId = ID item mới
+symbol = item mới là gì
+golden = item mới có golden không
+to = vị trí cuối cùng item mới sẽ nằm
+enterFrom = vị trí item mới bay/rơi vào từ đâu
+```
+
+FE dùng để render:
+
+```txt
+symbol mới rơi từ trên xuống
+```
+
+Không cần tự đoán item mới bằng cách so sánh before/after.
+
+---
+
+## 14. `visualGoldenTransforms`
+
+```json
+"visualGoldenTransforms": []
+```
+
+Nếu không có golden transform thì là mảng rỗng.
+
+Nếu có, sẽ có dạng:
+
+```json
+"visualGoldenTransforms": [
+  {
+    "cellId": "s2-c2-r2",
+    "from": { "col": 2, "row": 2 },
+    "to": { "col": 2, "row": 2 },
+    "fromSymbol": "ITEM_5",
+    "toSymbol": "WILD",
+    "fromGolden": true,
+    "toGolden": false
+  }
+]
+```
+
+Ý nghĩa:
+
+```txt
+Golden symbol tham gia thắng
+→ không bị xóa
+→ chuyển thành WILD
+```
+
+Không phải item rơi xuống rồi “gom thành golden”.
+
+FE dùng field này để chạy hiệu ứng:
+
+```txt
+ITEM golden → WILD
+```
+
+---
+
+## 15. `animationReelsAfterDrop`
+
+```json
+"animationReelsAfterDrop": [...]
+```
+
+Đây là **board visual cuối cùng sau khi remove/drop/new/transform xong**.
+
+FE dùng làm final frame.
+
+Flow đúng:
+
+```txt
+Không so sánh before/after để đoán rơi.
+Dùng animationDropMap + animationNewSymbols để animate.
+Sau đó snap về animationReelsAfterDrop.
+```
+
+Nói đơn giản:
+
+```txt
+animationReelsAfterDrop = kết quả cuối
+animationDropMap = đường rơi
+animationNewSymbols = item mới
+```
+
+---
+
+# Nhóm field kết quả tiền/game
+
+## 16. `totalWin`
+
+```json
+"totalWin": 675
+```
+
+Tổng tiền thắng của toàn bộ spin.
+
+Nếu nhiều cascade:
+
+```txt
+totalWin = stepWin step 1 + stepWin step 2 + ...
+```
+
+---
+
+## 17. `balance`
+
+```json
+"balance": 1000225
+```
+
+Số dư sau khi backend xử lý bet/settle thành công.
+
+FE chỉ update balance khi:
+
+```txt
+cmd = 4001
+seamless.payoutStatus = SUCCESS
+```
+
+---
+
+## 18. `bet`
+
+```json
+"bet": {
+  "roomId": 1,
+  "betOptionId": "R1_BS_250_BL_9",
+  "totalBet": 450
+}
+```
+
+Thông tin cược của spin.
+
+FE thường chỉ cần:
+
+```txt
+totalBet = số tiền đã cược
+betOptionId = option đang chọn
+roomId = room đang chơi
+```
+
+Nếu UI cần hiển thị chi tiết chip/level thì có thể thêm `betSize`, `betLevel`.
+
+---
+
+## 19. `seamless`
+
+```json
+"seamless": {
+  "enabled": true,
+  "payoutStatus": "SUCCESS"
+}
+```
+
+Trạng thái ví.
+
+Ý nghĩa:
+
+```txt
+enabled = có dùng seamless wallet
+payoutStatus = trạng thái xử lý tiền
+```
+
+Các trạng thái thường cần quan tâm:
+
+```txt
+SUCCESS = tiền đã xử lý xong, FE được update balance
+PENDING = chưa chắc chắn, FE nên hiện trạng thái chờ
+FAILED = lỗi, không update balance như success
+```
+
+---
+
+## 20. `freeSpin`
+
+```json
+"freeSpin": {
+  "triggered": false,
+  "awarded": 0,
+  "remaining": 0,
+  "scatterCount": 0
+}
+```
+
+Thông tin free spin.
+
+Ý nghĩa:
+
+```txt
+triggered = spin này có kích hoạt free spin không
+awarded = số free spin được thưởng
+remaining = số free spin còn lại
+scatterCount = số scatter xuất hiện
+```
+
+---
+
+## 21. `jackpot`
+
+```json
+"jackpot": {
+  "enabled": false,
+  "triggered": false,
+  "amount": 0
+}
+```
+
+Thông tin jackpot.
+
+Ý nghĩa:
+
+```txt
+enabled = jackpot có bật không
+triggered = spin này có nổ hũ không
+amount = số tiền jackpot nếu nổ
+```
+
+Hiện theo contract đã chốt:
+
+```txt
+JP không trả như symbol trong reels.
+Nếu nổ jackpot thì trả qua jackpot.triggered và jackpot.amount.
+```
+
+---
+
+## 22. `state`
+
+```json
+"state": {
+  "mode": "BASE",
+  "bigWin": false,
+  "turbo": false,
+  "autoPlay": false
+}
+```
+
+Trạng thái phụ của game.
+
+Ý nghĩa:
+
+```txt
+mode = BASE hoặc FREE_SPIN
+bigWin = có phải big win không
+turbo = user có bật turbo không
+autoPlay = user có đang autoplay không
+```
+
+---
+
+## 23. `clientRequestId`
+
+```json
+"clientRequestId": "sample-fe-only-001"
+```
+
+ID request FE gửi lên, backend trả lại để FE đối chiếu.
+
+FE dùng để tránh nhầm response giữa nhiều request.
+
+---
+
+# Flow FE render theo response mới
+
+```txt
+1. Render animationReels ban đầu.
+2. Với từng cascadeSteps:
+   2.1 Render animationReelsBeforeDrop.
+   2.2 Highlight visualWins.positions.
+   2.3 Xóa animationRemovedPositions.
+   2.4 Cho item cũ rơi theo animationDropMap.
+   2.5 Cho item mới đi vào theo animationNewSymbols.
+   2.6 Chạy visualGoldenTransforms nếu có.
+   2.7 Snap về animationReelsAfterDrop.
+3. Sau cascade cuối, hiển thị totalWin.
+4. Nếu seamless.payoutStatus = SUCCESS thì update balance.
+```
