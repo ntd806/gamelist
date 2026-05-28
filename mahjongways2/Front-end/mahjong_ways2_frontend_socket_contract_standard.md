@@ -1470,3 +1470,327 @@ socket.send(JSON.stringify({
 [ ] Với pending payoutStatus, khóa spin và hiển thị đang xử lý.
 [ ] Không gửi page/size cho history; chỉ gửi limit.
 ```
+
+
+## sample response 4001 có ăn line/ways và có cascade sập xuống
+{
+  "cmd": 4001,
+  "spinId": "SPIN_SAMPLE_WIN_CASCADE_001",
+  "roundId": "RND_MW2_SPIN_SAMPLE_WIN_CASCADE_001",
+  "roomId": 1,
+  "reels": [
+    [
+      { "symbol": "ITEM_1", "golden": false },
+      { "symbol": "ITEM_4", "golden": false },
+      { "symbol": "ITEM_5", "golden": false },
+      { "symbol": "ITEM_6", "golden": false }
+    ],
+    [
+      { "symbol": "ITEM_1", "golden": true },
+      { "symbol": "ITEM_2", "golden": false },
+      { "symbol": "ITEM_3", "golden": false },
+      { "symbol": "ITEM_4", "golden": false },
+      { "symbol": "ITEM_5", "golden": false }
+    ],
+    [
+      { "symbol": "ITEM_1", "golden": false },
+      { "symbol": "ITEM_7", "golden": false },
+      { "symbol": "ITEM_6", "golden": false },
+      { "symbol": "ITEM_5", "golden": false },
+      { "symbol": "ITEM_4", "golden": false }
+    ],
+    [
+      { "symbol": "ITEM_2", "golden": false },
+      { "symbol": "ITEM_3", "golden": false },
+      { "symbol": "ITEM_4", "golden": false },
+      { "symbol": "ITEM_5", "golden": false },
+      { "symbol": "ITEM_6", "golden": false }
+    ],
+    [
+      { "symbol": "ITEM_7", "golden": false },
+      { "symbol": "ITEM_6", "golden": false },
+      { "symbol": "ITEM_5", "golden": false },
+      { "symbol": "ITEM_4", "golden": false }
+    ]
+  ],
+  "animationReels": [
+    [
+      { "symbol": "ITEM_7", "displayOnly": true },
+      { "symbol": "ITEM_1", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false },
+      { "symbol": "ITEM_3", "displayOnly": true }
+    ],
+    [
+      { "symbol": "ITEM_1", "displayOnly": false },
+      { "symbol": "ITEM_2", "displayOnly": false },
+      { "symbol": "ITEM_3", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false }
+    ],
+    [
+      { "symbol": "ITEM_1", "displayOnly": false },
+      { "symbol": "ITEM_7", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false }
+    ],
+    [
+      { "symbol": "ITEM_2", "displayOnly": false },
+      { "symbol": "ITEM_3", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false }
+    ],
+    [
+      { "symbol": "ITEM_2", "displayOnly": true },
+      { "symbol": "ITEM_7", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_1", "displayOnly": true }
+    ]
+  ],
+  "animationMeta": {
+    "mathLayout": [4, 5, 5, 5, 4],
+    "displayLayout": [6, 5, 5, 5, 6],
+    "displayOnlyPositions": [
+      { "col": 0, "row": 0 },
+      { "col": 0, "row": 5 },
+      { "col": 4, "row": 0 },
+      { "col": 4, "row": 5 }
+    ]
+  },
+  "cascadeSteps": [
+    {
+      "step": 1,
+      "mode": "BASE",
+      "multiplier": 1,
+      "reelsBefore": [
+        [
+          { "symbol": "ITEM_1", "golden": false },
+          { "symbol": "ITEM_4", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_6", "golden": false }
+        ],
+        [
+          { "symbol": "ITEM_1", "golden": true },
+          { "symbol": "ITEM_2", "golden": false },
+          { "symbol": "ITEM_3", "golden": false },
+          { "symbol": "ITEM_4", "golden": false },
+          { "symbol": "ITEM_5", "golden": false }
+        ],
+        [
+          { "symbol": "ITEM_1", "golden": false },
+          { "symbol": "ITEM_7", "golden": false },
+          { "symbol": "ITEM_6", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_4", "golden": false }
+        ],
+        [
+          { "symbol": "ITEM_2", "golden": false },
+          { "symbol": "ITEM_3", "golden": false },
+          { "symbol": "ITEM_4", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_6", "golden": false }
+        ],
+        [
+          { "symbol": "ITEM_7", "golden": false },
+          { "symbol": "ITEM_6", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_4", "golden": false }
+        ]
+      ],
+      "animationReelsBeforeDrop": [
+        [
+          { "symbol": "ITEM_7", "displayOnly": true },
+          { "symbol": "ITEM_1", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false },
+          { "symbol": "ITEM_3", "displayOnly": true }
+        ],
+        [
+          { "symbol": "ITEM_1", "displayOnly": false },
+          { "symbol": "ITEM_2", "displayOnly": false },
+          { "symbol": "ITEM_3", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false }
+        ],
+        [
+          { "symbol": "ITEM_1", "displayOnly": false },
+          { "symbol": "ITEM_7", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false }
+        ],
+        [
+          { "symbol": "ITEM_2", "displayOnly": false },
+          { "symbol": "ITEM_3", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false }
+        ],
+        [
+          { "symbol": "ITEM_2", "displayOnly": true },
+          { "symbol": "ITEM_7", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_1", "displayOnly": true }
+        ]
+      ],
+      "wins": [
+        {
+          "symbol": "ITEM_1",
+          "matchedReels": 3,
+          "ways": 1,
+          "payTableValue": 2,
+          "lineBet": 22.5,
+          "multiplier": 1,
+          "winAmount": 45,
+          "positions": [
+            { "reel": 0, "row": 0 },
+            { "reel": 1, "row": 0 },
+            { "reel": 2, "row": 0 }
+          ]
+        }
+      ],
+      "removedPositions": [
+        { "reel": 0, "row": 0 },
+        { "reel": 2, "row": 0 }
+      ],
+      "goldenTransforms": [
+        {
+          "position": { "reel": 1, "row": 0 },
+          "from": { "symbol": "ITEM_1", "golden": true },
+          "to": { "symbol": "WILD", "golden": false }
+        }
+      ],
+      "reelsAfterDrop": [
+        [
+          { "symbol": "ITEM_7", "golden": false },
+          { "symbol": "ITEM_4", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_6", "golden": false }
+        ],
+        [
+          { "symbol": "WILD", "golden": false },
+          { "symbol": "ITEM_2", "golden": false },
+          { "symbol": "ITEM_3", "golden": false },
+          { "symbol": "ITEM_4", "golden": false },
+          { "symbol": "ITEM_5", "golden": false }
+        ],
+        [
+          { "symbol": "ITEM_6", "golden": false },
+          { "symbol": "ITEM_7", "golden": false },
+          { "symbol": "ITEM_6", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_4", "golden": false }
+        ],
+        [
+          { "symbol": "ITEM_2", "golden": false },
+          { "symbol": "ITEM_3", "golden": false },
+          { "symbol": "ITEM_4", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_6", "golden": false }
+        ],
+        [
+          { "symbol": "ITEM_7", "golden": false },
+          { "symbol": "ITEM_6", "golden": false },
+          { "symbol": "ITEM_5", "golden": false },
+          { "symbol": "ITEM_4", "golden": false }
+        ]
+      ],
+      "animationReelsAfterDrop": [
+        [
+          { "symbol": "ITEM_2", "displayOnly": true },
+          { "symbol": "ITEM_7", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false },
+          { "symbol": "ITEM_3", "displayOnly": true }
+        ],
+        [
+          { "symbol": "WILD", "displayOnly": false },
+          { "symbol": "ITEM_2", "displayOnly": false },
+          { "symbol": "ITEM_3", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false }
+        ],
+        [
+          { "symbol": "ITEM_6", "displayOnly": false },
+          { "symbol": "ITEM_7", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false }
+        ],
+        [
+          { "symbol": "ITEM_2", "displayOnly": false },
+          { "symbol": "ITEM_3", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false }
+        ],
+        [
+          { "symbol": "ITEM_2", "displayOnly": true },
+          { "symbol": "ITEM_7", "displayOnly": false },
+          { "symbol": "ITEM_6", "displayOnly": false },
+          { "symbol": "ITEM_5", "displayOnly": false },
+          { "symbol": "ITEM_4", "displayOnly": false },
+          { "symbol": "ITEM_1", "displayOnly": true }
+        ]
+      ],
+      "animationMeta": {
+        "mathLayout": [4, 5, 5, 5, 4],
+        "displayLayout": [6, 5, 5, 5, 6],
+        "displayOnlyPositions": [
+          { "col": 0, "row": 0 },
+          { "col": 0, "row": 5 },
+          { "col": 4, "row": 0 },
+          { "col": 4, "row": 5 }
+        ]
+      },
+      "stepWin": 45
+    }
+  ],
+  "totalWin": 45,
+  "balance": 999595,
+  "bet": {
+    "roomId": 1,
+    "betOptionId": "R1_BS_250_BL_9",
+    "betSize": 2.5,
+    "betLevel": 9,
+    "baseBet": 20,
+    "lineBet": 22.5,
+    "totalBet": 450
+  },
+  "seamless": {
+    "enabled": true,
+    "betTransactionId": "BET_RND_MW2_SPIN_SAMPLE_WIN_CASCADE_001",
+    "settleTransactionId": "SETTLE_RND_MW2_SPIN_SAMPLE_WIN_CASCADE_001",
+    "payoutStatus": "SUCCESS"
+  },
+  "freeSpin": {
+    "triggered": false,
+    "awarded": 0,
+    "remaining": 0,
+    "retriggered": false,
+    "scatterCount": 0
+  },
+  "jackpot": {
+    "enabled": false,
+    "triggered": false,
+    "jackpotId": null,
+    "amount": 0
+  },
+  "state": {
+    "mode": "BASE",
+    "pot": 1200000,
+    "bigWin": false,
+    "turbo": false,
+    "autoPlay": false
+  },
+  "clientRequestId": "sample-win-cascade-001"
+}
