@@ -4,7 +4,7 @@
 
 ## 1. Kết nối WebSocket
 
-Theo `application.yaml` và `.env.example` hiện tại:
+Thông tin kết nối hiện tại:
 
 ```txt
 WebSocket path: /ws
@@ -55,7 +55,7 @@ socket.onopen = () => {
 
 ### 3.1. Mọi request phải có `cmd`
 
-Nếu thiếu `cmd`, `Mahjong2SocketCommandDispatcher` gọi `Mahjong2SocketRequestMapper.requiredCommand(...)`, exception được map qua `SocketErrorMapper` thành `3999 INVALID_REQUEST`.
+Nếu thiếu `cmd`, lỗi trả về là `3999 INVALID_REQUEST`.
 
 Response có dạng:
 
@@ -68,19 +68,13 @@ Response có dạng:
 }
 ```
 
-Lưu ý: source đang dùng:
-
-```txt
-spring.jackson.default-property-inclusion = non_null
-```
-
-Vì vậy field nào là `null` có thể không xuất hiện trong JSON. Ví dụ `balance` trong error response hiện thường là `null`, nên có thể bị omit.
+Lưu ý: field nào là `null` có thể không xuất hiện trong JSON. Ví dụ `balance` trong error response hiện thường là `null`, nên có thể bị omit.
 
 ---
 
 ### 3.2. Token field backend nhận
 
-`Mahjong2SocketRequestMapper.sessionToken(...)` nhận 3 field:
+Backend nhận token qua 3 field:
 
 ```txt
 sessionToken
@@ -135,26 +129,26 @@ Frontend chỉ cần gửi token. Khi spin, backend không lấy `userId`, `curr
 
 ---
 
-## 4. Command list đang có trong source
+## 4. Command list hiện tại
 
-| CMD | Tên | FE gửi? | Handler hiện tại | Response |
-|---:|---|---|---|---|
-| `4001` | `PLAY_MAHJONG2` | Có | `PlayCommandHandler` | `4001` hoặc `3999` |
-| `4002` | `UPDATE_POT_MAHJONG2` | Không | Không thấy handler socket | `3999 UNKNOWN_COMMAND` nếu gửi |
-| `4003` | `SUBSCRIBE_MAHJONG2` | Có | `SubscribeCommandHandler` | `4009` |
-| `4004` | `UNSUBSCRIBE_MAHJONG2` | Có | `RoomCommandHandler` | `4009` với `subscribed=false` |
-| `4005` | `CHANGE_ROOM_MAHJONG2` | Có | `SubscribeCommandHandler` | `4009` |
-| `4006` | `AUTO_PLAY_MAHJONG2` | Có nhưng unsupported | `AutoPlayCommandHandler` | `3999 AUTO_PLAY_UNSUPPORTED` |
-| `4007` | `STOP_AUTO_PLAY_MAHJONG2` | Có | `AutoPlayCommandHandler` | `4008` |
-| `4008` | `FORCE_STOP_AUTO_MAHJONG2` | Response only | - | `{ "cmd": 4008, "reason": "USER_STOP" }` |
-| `4009` | `INFO_MAHJONG2` | Response only | - | Subscribe/change room response |
-| `4010` | `BIG_WIN_MAHJONG2` | Không | Không thấy handler socket | `3999 UNKNOWN_COMMAND` nếu gửi |
-| `4011` | `TOTAL_FREE_SPIN_MAHJONG2` | Không | Không thấy handler socket | `3999 UNKNOWN_COMMAND` nếu gửi |
-| `4013` | `MINIMIZE_MAHJONG2` | Có | `MinimizeCommandHandler` | `4014` |
-| `4014` | `MINIMIZE_RESULT_MAHJONG2` | Response only | - | `{ "cmd": 4014, "success": true }` |
-| `4015` | `HISTORY_MAHJONG2` | Có | `HistoryCommandHandler` | `4016` |
-| `4016` | `HISTORY_RESULT_MAHJONG2` | Response only | - | History response |
-| `3999` | `ERROR` | Response only | `SocketErrorMapper` | Error response |
+| CMD | Tên | FE gửi? | Response |
+|---:|---|---|---|
+| `4001` | `PLAY_MAHJONG2` | Có | `4001` hoặc `3999` |
+| `4002` | `UPDATE_POT_MAHJONG2` | Không | `3999 UNKNOWN_COMMAND` nếu gửi |
+| `4003` | `SUBSCRIBE_MAHJONG2` | Có | `4009` |
+| `4004` | `UNSUBSCRIBE_MAHJONG2` | Có | `4009` với `subscribed=false` |
+| `4005` | `CHANGE_ROOM_MAHJONG2` | Có | `4009` |
+| `4006` | `AUTO_PLAY_MAHJONG2` | Có nhưng unsupported | `3999 AUTO_PLAY_UNSUPPORTED` |
+| `4007` | `STOP_AUTO_PLAY_MAHJONG2` | Có | `4008` |
+| `4008` | `FORCE_STOP_AUTO_MAHJONG2` | Response only | `{ "cmd": 4008, "reason": "USER_STOP" }` |
+| `4009` | `INFO_MAHJONG2` | Response only | Subscribe/change room response |
+| `4010` | `BIG_WIN_MAHJONG2` | Không | `3999 UNKNOWN_COMMAND` nếu gửi |
+| `4011` | `TOTAL_FREE_SPIN_MAHJONG2` | Không | `3999 UNKNOWN_COMMAND` nếu gửi |
+| `4013` | `MINIMIZE_MAHJONG2` | Có | `4014` |
+| `4014` | `MINIMIZE_RESULT_MAHJONG2` | Response only | `{ "cmd": 4014, "success": true }` |
+| `4015` | `HISTORY_MAHJONG2` | Có | `4016` |
+| `4016` | `HISTORY_RESULT_MAHJONG2` | Response only | History response |
+| `3999` | `ERROR` | Response only | Error response |
 
 ---
 
@@ -182,9 +176,9 @@ Frontend chỉ cần gửi token. Khi spin, backend không lấy `userId`, `curr
 
 ### 5.2. Response — cmd `4009`
 
-Response `4009` được tạo từ `GameInitService.subscribe(...)` và DTO `InfoMahjong2Response`.
+Response `4009` là response init game khi subscribe/change room thành công.
 
-Shape theo source hiện tại:
+Shape hiện tại:
 
 ```json
 {
@@ -383,7 +377,7 @@ Shape theo source hiện tại:
 
 ## 6. Animation contract hiện tại
 
-Source hiện tại đã implement animation bằng các field sau:
+Contract hiện tại đã có animation bằng các field sau:
 
 ```txt
 4009:
@@ -399,7 +393,7 @@ cascadeSteps[]:
 - animationMeta
 ```
 
-Source hiện tại **không có field**:
+Contract hiện tại **không có field**:
 
 ```txt
 displayReels
@@ -467,7 +461,7 @@ Column 4:
 
 `animationReels` là visual board FE dùng để render layout `[6,5,5,5,6]`.
 
-Cell shape theo `AnimationSymbolDto`:
+Cell shape:
 
 ```json
 {
@@ -488,11 +482,11 @@ Cell shape theo `AnimationSymbolDto`:
 Lưu ý quan trọng:
 
 ```txt
-AnimationSymbolDto chỉ có:
+Animation cell chỉ có:
 - symbol
 - displayOnly
 
-AnimationSymbolDto không có field golden.
+Animation cell không có field `golden`.
 ```
 
 Nếu FE cần render golden state, dùng `reels` / `cascadeSteps.reelsBefore` / `cascadeSteps.reelsAfterDrop` là nguồn math truth có `golden`.
@@ -501,7 +495,7 @@ Nếu FE cần render golden state, dùng `reels` / `cascadeSteps.reelsBefore` /
 
 ### 6.3. `animationMeta` trong `4001`
 
-Shape theo source:
+Shape hiện tại:
 
 ```json
 {
@@ -520,15 +514,15 @@ Khác với `animationConfig`, `animationMeta` trong `4001` **không có** field
 
 ---
 
-### 6.4. Cách backend tạo animation symbols
+### 6.4. Cách tạo animation symbols
 
-Theo `AnimationReelsDecorator`:
+Quy tắc tạo `animationReels` hiện tại:
 
 ```txt
-- animationReels được tạo sau khi ResultMahjong2Response đã được assemble.
+- animationReels được tạo từ reels math sau khi có result.
 - Không thay đổi reels math.
 - Không thay đổi cascadeSteps math.
-- Không consume gameplay RNG để tạo buffer.
+- Không dùng gameplay RNG để tạo buffer.
 - Buffer top lấy symbol của cell đầu trong math reel.
 - Buffer bottom lấy symbol của cell cuối trong math reel.
 ```
@@ -587,9 +581,9 @@ balance
 }
 ```
 
-`CHANGE_ROOM_MAHJONG2` dùng cùng `SubscribeCommandHandler` với `4003`, nên response cũng là `4009` và có cùng schema, bao gồm `animationConfig`.
+`CHANGE_ROOM_MAHJONG2` trả response `4009` và có cùng schema với subscribe, bao gồm `animationConfig`.
 
-Nếu room không hợp lệ, backend trả `3999` theo `SocketErrorMapper`.
+Nếu room không hợp lệ, backend trả `3999`.
 
 ---
 
@@ -606,7 +600,7 @@ Nếu room không hợp lệ, backend trả `3999` theo `SocketErrorMapper`.
 
 ### Response
 
-`RoomCommandHandler` trả map:
+Response:
 
 ```json
 {
@@ -648,7 +642,7 @@ Do response là map riêng, các field như `rooms`, `room`, `betOptions`, `game
 
 ### 9.3. Các field FE không được gửi khi spin
 
-`Mahjong2SocketRequestMapper.rejectClientBetFields(...)` reject nếu request có bất kỳ field nào sau đây:
+Nếu request spin có bất kỳ field nào sau đây, backend trả lỗi:
 
 ```txt
 betSize
@@ -686,7 +680,7 @@ Response lỗi:
 
 ### 9.4. Nếu thiếu `roomId`
 
-`roomId` là bắt buộc trong `4001`. Nếu thiếu, mapper ném `MoneyDomainException(INVALID_ROOM)`.
+`roomId` là bắt buộc trong `4001`. Nếu thiếu, lỗi trả về là `3999 INVALID_ROOM`.
 
 Response:
 
@@ -701,7 +695,7 @@ Response:
 
 ### 9.5. Nếu thiếu `clientRequestId`
 
-Nếu thiếu `clientRequestId`, mapper ném `IllegalArgumentException`, được map thành `INVALID_REQUEST`.
+Nếu thiếu `clientRequestId`, lỗi trả về là `3999 INVALID_REQUEST`.
 
 Response:
 
@@ -718,15 +712,9 @@ Response:
 
 ## 10. PLAY success response — cmd `4001`
 
-Response `4001` được tạo từ `ResultAssembler` và DTO `ResultMahjong2Response`.
+Response `4001` gồm result math và các field animation nếu animation reels đang bật.
 
-`ResultAssembler` build response math trước, sau đó gọi:
-
-```java
-animationReelsDecorator.decorate(response)
-```
-
-Vì vậy `animationReels` là field được decorate thêm sau khi result math đã được assemble.
+`animationReels` được tạo thêm từ result math, không thay thế `reels`.
 
 ---
 
@@ -864,7 +852,7 @@ Vì vậy `animationReels` là field được decorate thêm sau khi result math
 }
 ```
 
-Nếu Jackson omit null, `jackpot.type` có thể không xuất hiện.
+Nếu field `jackpot.type` là `null`, field này có thể không xuất hiện trong JSON.
 
 ---
 
@@ -893,11 +881,6 @@ Nếu Jackson omit null, `jackpot.type` có thể không xuất hiện.
 
 ### 10.3. `reels`
 
-Source type:
-
-```java
-List<List<Mahjong2Cell>>
-```
 
 Cell shape:
 
@@ -930,11 +913,6 @@ Tức là:
 
 ### 10.4. `animationReels`
 
-Source type:
-
-```java
-List<List<AnimationSymbolDto>>
-```
 
 Cell shape:
 
@@ -957,7 +935,7 @@ Layout:
 
 ### 10.5. `cascadeSteps`
 
-Mỗi cascade step có shape theo `CascadeStepInfo`:
+Mỗi cascade step có shape:
 
 ```json
 {
@@ -1142,7 +1120,7 @@ Hoặc:
 }
 ```
 
-Rule từ `HistoryCommandHandler`:
+Rule history hiện tại:
 
 ```txt
 limit default = 20
@@ -1151,7 +1129,7 @@ limit max = 50
 page / size không được hỗ trợ
 ```
 
-Nếu gửi `page` hoặc `size`, backend ném `MoneyDomainException(INVALID_REQUEST, "HISTORY_MAHJONG2 supports limit only")`, sau đó `SocketErrorMapper` trả `3999 INVALID_REQUEST`.
+Nếu gửi `page` hoặc `size`, backend trả `3999 INVALID_REQUEST`.
 
 ---
 
@@ -1200,7 +1178,7 @@ Nếu gửi `page` hoặc `size`, backend ném `MoneyDomainException(INVALID_REQ
 }
 ```
 
-`items[].result` là snapshot `ResultMahjong2Response` từ result store hoặc từ history summary fallback. Nếu result store trả full response, result có thể bao gồm `animationReels` / `animationMeta`. Nếu fallback từ `Mw2SpinHistory.resultSummaryJson`, result chỉ có summary fields do `SpinHistoryService.writeSummaryJson(...)` ghi, không có full `reels`.
+`items[].result` là snapshot kết quả spin. Nếu có full response, result có thể bao gồm `animationReels` / `animationMeta`. Nếu chỉ có summary fallback, result chỉ có summary fields và có thể không có full `reels`.
 
 ---
 
@@ -1241,7 +1219,7 @@ Auto play hiện không support.
 
 ### Response
 
-`AutoPlayCommandHandler` trả:
+Response:
 
 ```json
 {
@@ -1279,21 +1257,6 @@ Auto play hiện không support.
 ---
 
 ## 17. Error response chung — cmd `3999`
-
-Source DTO:
-
-```java
-Mahjong2ErrorResponse(
-  int cmd,
-  int errorCode,
-  String message,
-  BigDecimal balance,
-  String payoutStatus,
-  String clientRequestId,
-  String spinId,
-  String roundId
-)
-```
 
 Shape thường gặp:
 
