@@ -1,10 +1,14 @@
 # Mahjong Ways 2 — Frontend Socket Contract
 
+---
+
 ## 1. Kết nối WebSocket
+
+Theo `application.yaml` và `.env.example` hiện tại:
 
 ```txt
 WebSocket path: /ws
-Default port: 61144
+Default public port: 61144
 Local URL: ws://127.0.0.1:61144/ws
 ```
 
@@ -14,48 +18,69 @@ Frontend connect:
 const socket = new WebSocket("ws://127.0.0.1:61144/ws");
 ```
 
-Sau khi `onopen`, frontend gửi command `4003` để subscribe game.
+Sau khi `onopen`, frontend gửi `cmd = 4003` để subscribe game.
 
----
-
-## 2. Flow chuẩn từ FE
-
-```txt
-1. FE connect WebSocket
-2. FE gửi SUBSCRIBE_MAHJONG2 / cmd 4003
-3. BE trả INFO_MAHJONG2 / cmd 4009
-4. FE render room, betOptions, balance, symbols, config
-5. User chọn betOptionId
-6. FE gửi PLAY_MAHJONG2 / cmd 4001
-7. BE trả:
-   - cmd 4001 nếu spin success / pending result
-   - cmd 3999 nếu lỗi
-8. FE render reels + cascadeSteps
-9. FE update balance nếu payoutStatus = SUCCESS
-10. FE không update balance từ cmd 3999
+```js
+socket.onopen = () => {
+  socket.send(JSON.stringify({
+    cmd: 4003,
+    sessionToken: token,
+    roomId: 1
+  }));
+};
 ```
 
 ---
 
-## 3. Common request rule
+## 2. Flow chuẩn từ frontend
+
+```txt
+1. FE connect WebSocket.
+2. FE gửi SUBSCRIBE_MAHJONG2 / cmd 4003.
+3. BE trả INFO_MAHJONG2 / cmd 4009.
+4. FE render rooms, room hiện tại, betOptions, symbols, gameConfig, animationConfig, balance.
+5. User chọn betOptionId từ betOptions backend trả về.
+6. FE gửi PLAY_MAHJONG2 / cmd 4001.
+7. BE trả:
+   - cmd 4001 nếu spin thành công hoặc pending result.
+   - cmd 3999 nếu lỗi.
+8. FE render reels, animationReels, cascadeSteps.
+9. FE update balance chỉ khi cmd = 4001 và seamless.payoutStatus = SUCCESS.
+10. FE không update balance từ cmd = 3999.
+```
+
+---
+
+## 3. Common request rules
 
 ### 3.1. Mọi request phải có `cmd`
 
-Nếu thiếu `cmd`, backend trả lỗi:
+Nếu thiếu `cmd`, `Mahjong2SocketCommandDispatcher` gọi `Mahjong2SocketRequestMapper.requiredCommand(...)`, exception được map qua `SocketErrorMapper` thành `3999 INVALID_REQUEST`.
+
+Response có dạng:
 
 ```json
 {
   "cmd": 3999,
   "errorCode": 1001,
   "message": "INVALID_REQUEST",
-  "balance": 0,
   "payoutStatus": "FAILED"
 }
 ```
 
-### 3.2. Token field được backend nhận
+Lưu ý: source đang dùng:
 
-Source `Mahjong2SocketRequestMapper` nhận 3 field:
+```txt
+spring.jackson.default-property-inclusion = non_null
+```
+
+Vì vậy field nào là `null` có thể không xuất hiện trong JSON. Ví dụ `balance` trong error response hiện thường là `null`, nên có thể bị omit.
+
+---
+
+### 3.2. Token field backend nhận
+
+`Mahjong2SocketRequestMapper.sessionToken(...)` nhận 3 field:
 
 ```txt
 sessionToken
@@ -81,41 +106,61 @@ Hoặc:
 }
 ```
 
-### 3.3. FE không cần gửi `userId`, `currency`
+Hoặc:
 
-Backend lấy `userId` và `currency` từ session token.
+```json
+{
+  "cmd": 4003,
+  "session_token": "player-token"
+}
+```
 
-FE chỉ gửi token.
+Nếu thiếu token hoặc token rỗng, backend trả `3999 INVALID_REQUEST`.
+
+Nếu token có nhưng session resolver reject, backend trả `3999 INVALID_SESSION_TOKEN`.
 
 ---
 
-## 4. Command list
+### 3.3. FE không cần gửi `userId`, `currency`, `partnerCode`
 
-| CMD    | Tên                       | FE gửi?              | Response           |
-| -----: | ------------------------- | -------------------- | ------------------ |
-| `4001` | `PLAY_MAHJONG2`           | Có                   | `4001` hoặc `3999` |
-| `4003` | `SUBSCRIBE_MAHJONG2`      | Có                   | `4009`             |
-| `4004` | `UNSUBSCRIBE_MAHJONG2`    | Có                   | `4009`             |
-| `4005` | `CHANGE_ROOM_MAHJONG2`    | Có                   | `4009`             |
-| `4006` | `AUTO_PLAY_MAHJONG2`      | Có nhưng unsupported | `3999`             |
-| `4007` | `STOP_AUTO_PLAY_MAHJONG2` | Có                   | `4008`             |
-| `4013` | `MINIMIZE_MAHJONG2`       | Có                   | `4014`             |
-| `4015` | `HISTORY_MAHJONG2`        | Có                   | `4016`             |
-| `3999` | `ERROR`                   | BE trả lỗi           | -                  |
-
-Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
+Backend resolve các thông tin này từ session token:
 
 ```txt
-4002 UPDATE_POT_MAHJONG2
-4010 BIG_WIN_MAHJONG2
-4011 TOTAL_FREE_SPIN_MAHJONG2
+userId
+currency
+partnerCode
 ```
+
+Frontend chỉ cần gửi token. Khi spin, backend không lấy `userId`, `currency`, `partnerCode` từ request body làm nguồn tin cậy.
+
+---
+
+## 4. Command list đang có trong source
+
+| CMD | Tên | FE gửi? | Handler hiện tại | Response |
+|---:|---|---|---|---|
+| `4001` | `PLAY_MAHJONG2` | Có | `PlayCommandHandler` | `4001` hoặc `3999` |
+| `4002` | `UPDATE_POT_MAHJONG2` | Không | Không thấy handler socket | `3999 UNKNOWN_COMMAND` nếu gửi |
+| `4003` | `SUBSCRIBE_MAHJONG2` | Có | `SubscribeCommandHandler` | `4009` |
+| `4004` | `UNSUBSCRIBE_MAHJONG2` | Có | `RoomCommandHandler` | `4009` với `subscribed=false` |
+| `4005` | `CHANGE_ROOM_MAHJONG2` | Có | `SubscribeCommandHandler` | `4009` |
+| `4006` | `AUTO_PLAY_MAHJONG2` | Có nhưng unsupported | `AutoPlayCommandHandler` | `3999 AUTO_PLAY_UNSUPPORTED` |
+| `4007` | `STOP_AUTO_PLAY_MAHJONG2` | Có | `AutoPlayCommandHandler` | `4008` |
+| `4008` | `FORCE_STOP_AUTO_MAHJONG2` | Response only | - | `{ "cmd": 4008, "reason": "USER_STOP" }` |
+| `4009` | `INFO_MAHJONG2` | Response only | - | Subscribe/change room response |
+| `4010` | `BIG_WIN_MAHJONG2` | Không | Không thấy handler socket | `3999 UNKNOWN_COMMAND` nếu gửi |
+| `4011` | `TOTAL_FREE_SPIN_MAHJONG2` | Không | Không thấy handler socket | `3999 UNKNOWN_COMMAND` nếu gửi |
+| `4013` | `MINIMIZE_MAHJONG2` | Có | `MinimizeCommandHandler` | `4014` |
+| `4014` | `MINIMIZE_RESULT_MAHJONG2` | Response only | - | `{ "cmd": 4014, "success": true }` |
+| `4015` | `HISTORY_MAHJONG2` | Có | `HistoryCommandHandler` | `4016` |
+| `4016` | `HISTORY_RESULT_MAHJONG2` | Response only | - | History response |
+| `3999` | `ERROR` | Response only | `SocketErrorMapper` | Error response |
 
 ---
 
 ## 5. SUBSCRIBE_MAHJONG2 — cmd `4003`
 
-### Request FE gửi
+### 5.1. Request
 
 ```json
 {
@@ -125,9 +170,21 @@ Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
 }
 ```
 
-`roomId` optional. Nếu không gửi hoặc `roomId <= 0`, backend chọn default room.
+### Field request
 
-### Response BE trả — cmd `4009`
+| Field | Bắt buộc | Ý nghĩa |
+|---|---:|---|
+| `cmd` | Có | Luôn là `4003` |
+| `sessionToken` / `session_token` / `token` | Có | Token player |
+| `roomId` | Không | Nếu thiếu hoặc `<= 0`, backend chọn room default từ catalog |
+
+---
+
+### 5.2. Response — cmd `4009`
+
+Response `4009` được tạo từ `GameInitService.subscribe(...)` và DTO `InfoMahjong2Response`.
+
+Shape theo source hiện tại:
 
 ```json
 {
@@ -138,7 +195,7 @@ Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
       "name": "Default Room",
       "enabled": true,
       "defaultBetOptionId": "R1_BS_250_BL_9",
-      "minTotalBet": 0.4,
+      "minTotalBet": 2,
       "maxTotalBet": 500,
       "betSize": 2.5,
       "betLevel": 9,
@@ -153,7 +210,7 @@ Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
     "name": "Default Room",
     "enabled": true,
     "defaultBetOptionId": "R1_BS_250_BL_9",
-    "minTotalBet": 0.4,
+    "minTotalBet": 2,
     "maxTotalBet": 500,
     "betSize": 2.5,
     "betLevel": 9,
@@ -164,14 +221,14 @@ Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
   },
   "betOptions": [
     {
-      "betOptionId": "R1_BS_002_BL_1",
+      "betOptionId": "R1_BS_010_BL_1",
       "roomId": 1,
-      "betSize": 0.02,
+      "betSize": 0.1,
       "betLevel": 1,
       "baseBet": 20,
-      "lineBet": 0.02,
-      "totalBet": 0.4,
-      "displayName": "0.4 / lượt",
+      "lineBet": 0.1,
+      "totalBet": 2,
+      "displayName": "2 / lượt",
       "enabled": true,
       "isMin": true,
       "isMax": false
@@ -284,30 +341,241 @@ Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
     "remainingFreeSpin": 0,
     "autoPlay": false,
     "turbo": false
+  },
+  "animationConfig": {
+    "enabled": true,
+    "mathLayout": [4, 5, 5, 5, 4],
+    "displayLayout": [6, 5, 5, 5, 6],
+    "displayOnlyPositions": [
+      { "col": 0, "row": 0 },
+      { "col": 0, "row": 5 },
+      { "col": 4, "row": 0 },
+      { "col": 4, "row": 5 }
+    ],
+    "displayOnlyAffectsMath": false
   }
 }
 ```
 
-### Giải thích field chính
+### 5.3. Giải thích field `4009`
 
-| Field                             | Ý nghĩa                                     |
-| --------------------------------- | ------------------------------------------- |
-| `cmd`                             | `4009`, response info game                  |
-| `rooms`                           | Danh sách room đang enabled                 |
-| `room`                            | Room hiện tại được chọn                     |
-| `betOptions`                      | Danh sách mức cược frontend được chọn       |
-| `gameConfig.reelRows`             | Layout reel: `[4,5,5,5,4]`                  |
-| `symbols`                         | Danh sách symbol để FE map asset            |
-| `wildRule`                        | Rule WILD                                   |
-| `goldenRule`                      | Rule golden symbol transform thành WILD     |
-| `multipliers`                     | Multiplier theo cascade step                |
-| `freeSpinRule`                    | Rule free spin, dù hiện `hasFreeSpin=false` |
-| `playerState.balance`             | Số dư hiện tại                              |
-| `playerState.selectedBetOptionId` | Bet mặc định nên select                     |
+| Field | Ý nghĩa |
+|---|---|
+| `cmd` | Luôn là `4009` |
+| `rooms` | Danh sách room enabled |
+| `room` | Room hiện tại được chọn |
+| `betOptions` | Danh sách mức cược FE được chọn |
+| `gameConfig.gameCode` | Mã game, hiện là `MAHJONG_WAYS_2` |
+| `gameConfig.reelRows` | Layout math thật: `[4,5,5,5,4]` |
+| `gameConfig.totalWays` | Tổng ways: `2000` |
+| `gameConfig.minMatchedReels` | Số reel tối thiểu để có win, hiện là `3` |
+| `gameConfig.winDirection` | Hướng tính win, hiện là `LEFT_TO_RIGHT` |
+| `symbols` | Danh sách symbol để FE map asset |
+| `wildRule` | Rule WILD |
+| `goldenRule` | Rule golden symbol transform thành WILD |
+| `multipliers` | Multiplier theo cascade step |
+| `freeSpinRule` | Rule free spin config |
+| `playerState.balance` | Số dư hiện tại lấy qua money service |
+| `playerState.selectedBetOptionId` | Bet option default FE nên select |
+| `animationConfig` | Config visual-only cho animation reels |
 
 ---
 
-## 6. CHANGE_ROOM_MAHJONG2 — cmd `4005`
+## 6. Animation contract hiện tại
+
+Source hiện tại đã implement animation bằng các field sau:
+
+```txt
+4009:
+- animationConfig
+
+4001:
+- animationReels
+- animationMeta
+
+cascadeSteps[]:
+- animationReelsBeforeDrop
+- animationReelsAfterDrop
+- animationMeta
+```
+
+Source hiện tại **không có field**:
+
+```txt
+displayReels
+```
+
+Vì vậy frontend chỉ nên dùng `animationReels`, không dùng `displayReels`.
+
+---
+
+### 6.1. `animationConfig` trong `4009`
+
+`animationConfig` cho FE biết layout nào là math thật và layout nào chỉ để render:
+
+```json
+{
+  "enabled": true,
+  "mathLayout": [4, 5, 5, 5, 4],
+  "displayLayout": [6, 5, 5, 5, 6],
+  "displayOnlyPositions": [
+    { "col": 0, "row": 0 },
+    { "col": 0, "row": 5 },
+    { "col": 4, "row": 0 },
+    { "col": 4, "row": 5 }
+  ],
+  "displayOnlyAffectsMath": false
+}
+```
+
+Ý nghĩa:
+
+| Field | Ý nghĩa |
+|---|---|
+| `enabled` | Animation reels có bật không |
+| `mathLayout` | Layout thật để backend tính game |
+| `displayLayout` | Layout FE render animation |
+| `displayOnlyPositions` | Các ô chỉ để hiển thị, không tính game |
+| `displayOnlyAffectsMath` | Luôn `false` theo code hiện tại |
+
+Mapping hiện tại:
+
+```txt
+Column 0:
+- display row 0 = displayOnly top buffer
+- display row 1 = math row 0
+- display row 2 = math row 1
+- display row 3 = math row 2
+- display row 4 = math row 3
+- display row 5 = displayOnly bottom buffer
+
+Columns 1,2,3:
+- display rows 0..4 = math rows 0..4
+
+Column 4:
+- display row 0 = displayOnly top buffer
+- display row 1 = math row 0
+- display row 2 = math row 1
+- display row 3 = math row 2
+- display row 4 = math row 3
+- display row 5 = displayOnly bottom buffer
+```
+
+---
+
+### 6.2. `animationReels` trong `4001`
+
+`animationReels` là visual board FE dùng để render layout `[6,5,5,5,6]`.
+
+Cell shape theo `AnimationSymbolDto`:
+
+```json
+{
+  "symbol": "ITEM_1",
+  "displayOnly": false
+}
+```
+
+Ô buffer display-only:
+
+```json
+{
+  "symbol": "ITEM_7",
+  "displayOnly": true
+}
+```
+
+Lưu ý quan trọng:
+
+```txt
+AnimationSymbolDto chỉ có:
+- symbol
+- displayOnly
+
+AnimationSymbolDto không có field golden.
+```
+
+Nếu FE cần render golden state, dùng `reels` / `cascadeSteps.reelsBefore` / `cascadeSteps.reelsAfterDrop` là nguồn math truth có `golden`.
+
+---
+
+### 6.3. `animationMeta` trong `4001`
+
+Shape theo source:
+
+```json
+{
+  "mathLayout": [4, 5, 5, 5, 4],
+  "displayLayout": [6, 5, 5, 5, 6],
+  "displayOnlyPositions": [
+    { "col": 0, "row": 0 },
+    { "col": 0, "row": 5 },
+    { "col": 4, "row": 0 },
+    { "col": 4, "row": 5 }
+  ]
+}
+```
+
+Khác với `animationConfig`, `animationMeta` trong `4001` **không có** field `enabled` và **không có** field `displayOnlyAffectsMath`.
+
+---
+
+### 6.4. Cách backend tạo animation symbols
+
+Theo `AnimationReelsDecorator`:
+
+```txt
+- animationReels được tạo sau khi ResultMahjong2Response đã được assemble.
+- Không thay đổi reels math.
+- Không thay đổi cascadeSteps math.
+- Không consume gameplay RNG để tạo buffer.
+- Buffer top lấy symbol của cell đầu trong math reel.
+- Buffer bottom lấy symbol của cell cuối trong math reel.
+```
+
+Nghĩa là với cột 0 có 4 math cells:
+
+```txt
+math reel 0 = [A, B, C, D]
+animation reel 0 = [A(displayOnly), A, B, C, D, D(displayOnly)]
+```
+
+Với cột 4 có 4 math cells:
+
+```txt
+math reel 4 = [E, F, G, H]
+animation reel 4 = [E(displayOnly), E, F, G, H, H(displayOnly)]
+```
+
+---
+
+### 6.5. Rule bắt buộc cho FE
+
+```txt
+FE dùng reels để biết kết quả thật.
+FE dùng animationReels để render animation.
+FE không được dùng animationReels để tự tính thắng.
+FE không được đếm scatter/freeSpin/jackpot từ animationReels.
+FE không được highlight removedPositions trên ô displayOnly.
+```
+
+Các logic sau chỉ được dựa vào backend response math/result:
+
+```txt
+win
+ways
+cascade
+removedPositions
+goldenTransforms
+freeSpin
+jackpot
+totalWin
+balance
+```
+
+---
+
+## 7. CHANGE_ROOM_MAHJONG2 — cmd `4005`
 
 ### Request
 
@@ -319,27 +587,41 @@ Các cmd có trong `Mahjong2CommandIds` nhưng chưa handler thực tế cho FE:
 }
 ```
 
-### Response
+`CHANGE_ROOM_MAHJONG2` dùng cùng `SubscribeCommandHandler` với `4003`, nên response cũng là `4009` và có cùng schema, bao gồm `animationConfig`.
 
-Trả về cùng schema với `SUBSCRIBE_MAHJONG2`, tức `cmd = 4009`.
-
-Nếu `roomId` không tồn tại hoặc room disabled:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1001,
-  "message": "INVALID_ROOM",
-  "balance": 0,
-  "payoutStatus": "FAILED"
-}
-```
+Nếu room không hợp lệ, backend trả `3999` theo `SocketErrorMapper`.
 
 ---
 
-## 7. PLAY_MAHJONG2 — cmd `4001`
+## 8. UNSUBSCRIBE_MAHJONG2 — cmd `4004`
 
-### Request FE gửi
+### Request
+
+```json
+{
+  "cmd": 4004,
+  "sessionToken": "player-token"
+}
+```
+
+### Response
+
+`RoomCommandHandler` trả map:
+
+```json
+{
+  "cmd": 4009,
+  "subscribed": false
+}
+```
+
+Do response là map riêng, các field như `rooms`, `room`, `betOptions`, `gameConfig`, `animationConfig` không xuất hiện trong unsubscribe response.
+
+---
+
+## 9. PLAY_MAHJONG2 — cmd `4001`
+
+### 9.1. Request FE gửi
 
 ```json
 {
@@ -352,21 +634,21 @@ Nếu `roomId` không tồn tại hoặc room disabled:
 }
 ```
 
-### Field request
+### 9.2. Field request
 
-| Field             | Bắt buộc | Ý nghĩa                                   |
-| ----------------- | -------: | ----------------------------------------- |
-| `cmd`             | Có       | Luôn `4001`                               |
-| `clientRequestId` | Có       | Idempotency key, mỗi spin mới phải unique |
-| `sessionToken`    | Có       | Token user                                |
-| `roomId`          | Có       | Room đang chơi                            |
-| `betOptionId`     | Có       | Mức cược lấy từ `betOptions`              |
-| `turbo`           | Không    | Default `false`                           |
-| `gameCode`        | Không    | Nếu không gửi backend dùng `MAHJONG_WAYS_2` |
+| Field | Bắt buộc | Ý nghĩa |
+|---|---:|---|
+| `cmd` | Có | Luôn là `4001` |
+| `clientRequestId` | Có | Idempotency key. Mỗi spin mới phải unique |
+| `sessionToken` / `session_token` / `token` | Có | Token player |
+| `roomId` | Có | Room đang chơi |
+| `betOptionId` | Có | Lấy từ `betOptions` backend trả về ở `4009` |
+| `turbo` | Không | Default `false` |
+| `gameCode` | Không | Nếu không gửi, backend dùng config game code hiện tại |
 
-### Các field FE không được gửi khi spin
+### 9.3. Các field FE không được gửi khi spin
 
-Backend reject nếu request có một trong các field này:
+`Mahjong2SocketRequestMapper.rejectClientBetFields(...)` reject nếu request có bất kỳ field nào sau đây:
 
 ```txt
 betSize
@@ -378,7 +660,7 @@ totalBet
 betAmountMinor
 ```
 
-Ví dụ sai:
+Ví dụ request sai:
 
 ```json
 {
@@ -398,16 +680,57 @@ Response lỗi:
   "cmd": 3999,
   "errorCode": 1001,
   "message": "CLIENT_BET_FIELDS_NOT_ALLOWED",
-  "balance": 0,
+  "payoutStatus": "FAILED"
+}
+```
+
+### 9.4. Nếu thiếu `roomId`
+
+`roomId` là bắt buộc trong `4001`. Nếu thiếu, mapper ném `MoneyDomainException(INVALID_ROOM)`.
+
+Response:
+
+```json
+{
+  "cmd": 3999,
+  "errorCode": 1001,
+  "message": "INVALID_ROOM",
+  "payoutStatus": "FAILED"
+}
+```
+
+### 9.5. Nếu thiếu `clientRequestId`
+
+Nếu thiếu `clientRequestId`, mapper ném `IllegalArgumentException`, được map thành `INVALID_REQUEST`.
+
+Response:
+
+```json
+{
+  "cmd": 3999,
+  "errorCode": 1001,
+  "message": "INVALID_REQUEST",
   "payoutStatus": "FAILED"
 }
 ```
 
 ---
 
-## 8. PLAY success response — cmd `4001`
+## 10. PLAY success response — cmd `4001`
 
-### Sample response có cascade
+Response `4001` được tạo từ `ResultAssembler` và DTO `ResultMahjong2Response`.
+
+`ResultAssembler` build response math trước, sau đó gọi:
+
+```java
+animationReelsDecorator.decorate(response)
+```
+
+Vì vậy `animationReels` là field được decorate thêm sau khi result math đã được assemble.
+
+---
+
+### 10.1. Sample response có animation reels
 
 ```json
 {
@@ -450,113 +773,58 @@ Response lỗi:
       { "symbol": "ITEM_4", "golden": false }
     ]
   ],
-  "cascadeSteps": [
-    {
-      "step": 1,
-      "mode": "BASE",
-      "multiplier": 1,
-      "reelsBefore": [
-        [
-          { "symbol": "ITEM_1", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_1", "golden": true },
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_1", "golden": false },
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ]
-      ],
-      "wins": [
-        {
-          "symbol": "ITEM_1",
-          "matchedReels": 3,
-          "ways": 1,
-          "payTableValue": 2,
-          "lineBet": 22.5,
-          "multiplier": 1,
-          "winAmount": 45,
-          "positions": [
-            { "reel": 0, "row": 0 },
-            { "reel": 1, "row": 0 },
-            { "reel": 2, "row": 0 }
-          ]
-        }
-      ],
-      "removedPositions": [
-        { "reel": 0, "row": 0 },
-        { "reel": 2, "row": 0 }
-      ],
-      "goldenTransforms": [
-        {
-          "position": { "reel": 1, "row": 0 },
-          "from": { "symbol": "ITEM_1", "golden": true },
-          "to": { "symbol": "WILD", "golden": false }
-        }
-      ],
-      "reelsAfterDrop": [
-        [
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "WILD", "golden": false },
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_2", "golden": false },
-          { "symbol": "ITEM_3", "golden": false },
-          { "symbol": "ITEM_4", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_6", "golden": false }
-        ],
-        [
-          { "symbol": "ITEM_7", "golden": false },
-          { "symbol": "ITEM_6", "golden": false },
-          { "symbol": "ITEM_5", "golden": false },
-          { "symbol": "ITEM_4", "golden": false }
-        ]
-      ],
-      "stepWin": 45
-    }
+  "animationReels": [
+    [
+      { "symbol": "ITEM_1", "displayOnly": true },
+      { "symbol": "ITEM_1", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": true }
+    ],
+    [
+      { "symbol": "ITEM_1", "displayOnly": false },
+      { "symbol": "ITEM_2", "displayOnly": false },
+      { "symbol": "ITEM_3", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false }
+    ],
+    [
+      { "symbol": "ITEM_1", "displayOnly": false },
+      { "symbol": "ITEM_7", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false }
+    ],
+    [
+      { "symbol": "ITEM_2", "displayOnly": false },
+      { "symbol": "ITEM_3", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false }
+    ],
+    [
+      { "symbol": "ITEM_7", "displayOnly": true },
+      { "symbol": "ITEM_7", "displayOnly": false },
+      { "symbol": "ITEM_6", "displayOnly": false },
+      { "symbol": "ITEM_5", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": false },
+      { "symbol": "ITEM_4", "displayOnly": true }
+    ]
   ],
-  "totalWin": 45,
-  "balance": 999595,
+  "animationMeta": {
+    "mathLayout": [4, 5, 5, 5, 4],
+    "displayLayout": [6, 5, 5, 5, 6],
+    "displayOnlyPositions": [
+      { "col": 0, "row": 0 },
+      { "col": 0, "row": 5 },
+      { "col": 4, "row": 0 },
+      { "col": 4, "row": 5 }
+    ]
+  },
+  "cascadeSteps": [],
+  "totalWin": 0,
+  "balance": 999550,
   "bet": {
     "roomId": 1,
     "betOptionId": "R1_BS_250_BL_9",
@@ -582,6 +850,7 @@ Response lỗi:
   "jackpot": {
     "enabled": false,
     "triggered": false,
+    "type": null,
     "amount": 0
   },
   "state": {
@@ -595,30 +864,34 @@ Response lỗi:
 }
 ```
 
+Nếu Jackson omit null, `jackpot.type` có thể không xuất hiện.
+
 ---
 
-## 9. Giải thích PLAY response
+### 10.2. Giải thích top-level field `4001`
 
-### Top-level fields
+| Field | Ý nghĩa |
+|---|---|
+| `cmd` | Luôn là `4001` nếu spin response thành công/pending |
+| `spinId` | ID spin backend tạo |
+| `roundId` | ID round dùng cho wallet/settlement |
+| `roomId` | Room đã chơi |
+| `reels` | Board math thật ban đầu sau khi spin |
+| `animationReels` | Board visual-only để FE render animation |
+| `animationMeta` | Metadata mapping math/display layout |
+| `cascadeSteps` | Danh sách cascade nếu có |
+| `totalWin` | Tổng tiền thắng |
+| `balance` | Balance sau settle nếu có |
+| `bet` | Cấu hình cược backend đã resolve từ `betOptionId` |
+| `seamless` | Thông tin transaction ví |
+| `freeSpin` | Trạng thái free spin |
+| `jackpot` | Trạng thái jackpot |
+| `state` | State phụ của game |
+| `clientRequestId` | Echo lại request id của FE |
 
-| Field             | Ý nghĩa                             |
-| ----------------- | ----------------------------------- |
-| `cmd`             | `4001`, kết quả spin                |
-| `spinId`          | ID spin backend tạo                 |
-| `roundId`         | ID round dùng cho wallet/settlement |
-| `roomId`          | Room đã chơi                        |
-| `reels`           | Board ban đầu sau khi spin          |
-| `cascadeSteps`    | Danh sách cascade nếu có win        |
-| `totalWin`        | Tổng tiền thắng                     |
-| `balance`         | Balance sau settle                  |
-| `bet`             | Cấu hình cược backend resolve       |
-| `seamless`        | Thông tin transaction ví            |
-| `freeSpin`        | Trạng thái free spin                |
-| `jackpot`         | Trạng thái jackpot                  |
-| `state`           | State phụ của game                  |
-| `clientRequestId` | Echo lại request id của FE          |
+---
 
-### `reels`
+### 10.3. `reels`
 
 Source type:
 
@@ -626,7 +899,7 @@ Source type:
 List<List<Mahjong2Cell>>
 ```
 
-Cell:
+Cell shape:
 
 ```json
 {
@@ -635,13 +908,7 @@ Cell:
 }
 ```
 
-Frontend hiểu:
-
-```js
-reels[reelIndex][rowIndex]
-```
-
-Layout hiện tại:
+Layout hiện tại theo config:
 
 ```txt
 reel 0: 4 cells
@@ -651,27 +918,80 @@ reel 3: 5 cells
 reel 4: 4 cells
 ```
 
-### `cascadeSteps`
-
-Mỗi step là một lần:
+Tức là:
 
 ```txt
-win → remove symbol thắng → golden transform nếu có → drop symbol mới
+[4, 5, 5, 5, 4]
 ```
 
-| Field              | Ý nghĩa                         |
-| ------------------ | ------------------------------- |
-| `step`             | Số thứ tự cascade, bắt đầu từ 1 |
-| `mode`             | `BASE` hoặc `FREE_SPIN`         |
-| `multiplier`       | Multiplier step đó              |
-| `reelsBefore`      | Board trước khi remove          |
-| `wins`             | Danh sách win ways              |
-| `removedPositions` | Vị trí cell bị remove           |
-| `goldenTransforms` | Cell golden được đổi thành WILD |
-| `reelsAfterDrop`   | Board sau khi drop              |
-| `stepWin`          | Tiền thắng của riêng step đó    |
+`reels` là math truth. FE không được thay `reels` bằng `animationReels` để tính game.
 
-Position đúng trong JSON:
+---
+
+### 10.4. `animationReels`
+
+Source type:
+
+```java
+List<List<AnimationSymbolDto>>
+```
+
+Cell shape:
+
+```json
+{
+  "symbol": "ITEM_1",
+  "displayOnly": false
+}
+```
+
+Layout:
+
+```txt
+[6, 5, 5, 5, 6]
+```
+
+`displayOnly=true` nghĩa là ô chỉ để render, không phải ô math.
+
+---
+
+### 10.5. `cascadeSteps`
+
+Mỗi cascade step có shape theo `CascadeStepInfo`:
+
+```json
+{
+  "step": 1,
+  "mode": "BASE",
+  "multiplier": 1,
+  "reelsBefore": [],
+  "animationReelsBeforeDrop": [],
+  "wins": [],
+  "removedPositions": [],
+  "goldenTransforms": [],
+  "reelsAfterDrop": [],
+  "animationReelsAfterDrop": [],
+  "animationMeta": {},
+  "stepWin": 45
+}
+```
+
+| Field | Ý nghĩa |
+|---|---|
+| `step` | Số thứ tự cascade, bắt đầu từ 1 |
+| `mode` | `BASE` hoặc `FREE_SPIN` |
+| `multiplier` | Multiplier step đó |
+| `reelsBefore` | Math board trước khi remove |
+| `animationReelsBeforeDrop` | Visual board trước drop |
+| `wins` | Danh sách win ways |
+| `removedPositions` | Vị trí math cell bị remove |
+| `goldenTransforms` | Cell golden được đổi thành WILD |
+| `reelsAfterDrop` | Math board sau khi drop |
+| `animationReelsAfterDrop` | Visual board sau drop |
+| `animationMeta` | Metadata layout cho step |
+| `stepWin` | Tiền thắng riêng step đó |
+
+Position trong JSON dùng field:
 
 ```json
 {
@@ -680,118 +1000,70 @@ Position đúng trong JSON:
 }
 ```
 
-Không phải `reelIndex`, `rowIndex`.
+Không phải:
 
-### Final board
+```txt
+reelIndex
+rowIndex
+```
 
-Top-level `reels` là board ban đầu.
+`removedPositions` luôn refer tới math layout `[4,5,5,5,4]`, không refer tới display-only rows.
 
-Final board lấy như sau:
+---
+
+### 10.6. Final board
+
+Top-level `reels` là board ban đầu của spin.
+
+Final math board lấy như sau:
 
 ```js
 const finalReels =
-  response.cascadeSteps.length > 0
+  response.cascadeSteps && response.cascadeSteps.length > 0
     ? response.cascadeSteps[response.cascadeSteps.length - 1].reelsAfterDrop
     : response.reels;
 ```
 
----
+Final visual board lấy như sau:
 
-## 10. PLAY response không có win
-
-Nếu không có win:
-
-```json
-{
-  "cmd": 4001,
-  "spinId": "SPIN_no_win_001",
-  "roundId": "RND_MW2_SPIN_no_win_001",
-  "roomId": 1,
-  "reels": [
-    [
-      { "symbol": "ITEM_1", "golden": false },
-      { "symbol": "ITEM_2", "golden": false },
-      { "symbol": "ITEM_3", "golden": false },
-      { "symbol": "ITEM_4", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_6", "golden": false },
-      { "symbol": "ITEM_7", "golden": false },
-      { "symbol": "ITEM_2", "golden": false },
-      { "symbol": "ITEM_3", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_4", "golden": false },
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_6", "golden": false },
-      { "symbol": "ITEM_7", "golden": false },
-      { "symbol": "ITEM_1", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_2", "golden": false },
-      { "symbol": "ITEM_3", "golden": false },
-      { "symbol": "ITEM_4", "golden": false },
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_6", "golden": false }
-    ],
-    [
-      { "symbol": "ITEM_7", "golden": false },
-      { "symbol": "ITEM_6", "golden": false },
-      { "symbol": "ITEM_5", "golden": false },
-      { "symbol": "ITEM_4", "golden": false }
-    ]
-  ],
-  "cascadeSteps": [],
-  "totalWin": 0,
-  "balance": 999550,
-  "bet": {
-    "roomId": 1,
-    "betOptionId": "R1_BS_250_BL_9",
-    "betSize": 2.5,
-    "betLevel": 9,
-    "baseBet": 20,
-    "lineBet": 22.5,
-    "totalBet": 450
-  },
-  "seamless": {
-    "enabled": true,
-    "betTransactionId": "BET_RND_MW2_SPIN_no_win_001",
-    "settleTransactionId": "SETTLE_RND_MW2_SPIN_no_win_001",
-    "payoutStatus": "SUCCESS"
-  },
-  "freeSpin": {
-    "triggered": false,
-    "awarded": 0,
-    "remaining": 0,
-    "retriggered": false,
-    "scatterCount": 0
-  },
-  "jackpot": {
-    "enabled": false,
-    "triggered": false,
-    "amount": 0
-  },
-  "state": {
-    "mode": "BASE",
-    "pot": 0,
-    "bigWin": false,
-    "turbo": false,
-    "autoPlay": false
-  },
-  "clientRequestId": "spin-20260521-0002"
-}
+```js
+const finalAnimationReels =
+  response.cascadeSteps && response.cascadeSteps.length > 0
+    ? response.cascadeSteps[response.cascadeSteps.length - 1].animationReelsAfterDrop
+    : response.animationReels;
 ```
 
 ---
 
-## 11. Pending / duplicate PLAY response
+## 11. PLAY response không có win
+
+Nếu không có win:
+
+```txt
+cascadeSteps = []
+totalWin = 0
+```
+
+Response vẫn có thể có:
+
+```txt
+animationReels
+animationMeta
+```
+
+nếu `mahjong2.animation-reels.enabled=true`.
+
+---
+
+## 12. Pending / duplicate PLAY response
 
 Nếu FE gửi lại cùng `clientRequestId`, backend xử lý idempotency.
 
-### Duplicate đang pending bet
+### 12.1. Pending response dạng `4001`
 
-Response vẫn là `cmd = 4001`:
+Một số pending/idempotency path có thể trả `cmd = 4001` với `seamless.payoutStatus` là trạng thái pending.
+
+Ví dụ:
 
 ```json
 {
@@ -811,27 +1083,30 @@ Response vẫn là `cmd = 4001`:
 }
 ```
 
-Do `spring.jackson.default-property-inclusion = non_null`, các field `null` có thể không xuất hiện.
+Do non-null inclusion, các field `null` có thể không xuất hiện.
 
 FE rule:
 
 ```txt
-payoutStatus = BET_PENDING / SETTLE_PENDING / JACKPOT_PENDING / CREATED
+payoutStatus = BET_PENDING / SETTLE_PENDING / JACKPOT_PENDING / CREATED / CANCEL_PENDING
 => không xem là spin success hoàn chỉnh
 => không update balance
 => nên lock spin hoặc hiển thị đang xử lý
 ```
 
-### Duplicate đã failed
+---
 
-Bản mới trả `cmd = 3999`:
+### 12.2. Duplicate đã failed
+
+Nếu duplicate failed được map qua error path, response có thể là `3999`.
+
+Ví dụ:
 
 ```json
 {
   "cmd": 3999,
   "errorCode": 1009,
   "message": "FAILED",
-  "balance": 0,
   "payoutStatus": "FAILED",
   "clientRequestId": "spin-20260521-0004",
   "spinId": "SPIN_failed_001",
@@ -846,7 +1121,6 @@ Hoặc:
   "cmd": 3999,
   "errorCode": 1009,
   "message": "FAILED_NEED_REVIEW",
-  "balance": 0,
   "payoutStatus": "FAILED_NEED_REVIEW",
   "clientRequestId": "spin-20260521-0005",
   "spinId": "SPIN_review_001",
@@ -856,9 +1130,9 @@ Hoặc:
 
 ---
 
-## 12. HISTORY_MAHJONG2 — cmd `4015`
+## 13. HISTORY_MAHJONG2 — cmd `4015`
 
-### Request
+### 13.1. Request
 
 ```json
 {
@@ -868,7 +1142,7 @@ Hoặc:
 }
 ```
 
-Rule từ source:
+Rule từ `HistoryCommandHandler`:
 
 ```txt
 limit default = 20
@@ -877,9 +1151,11 @@ limit max = 50
 page / size không được hỗ trợ
 ```
 
-Nếu gửi `page` hoặc `size` sẽ lỗi.
+Nếu gửi `page` hoặc `size`, backend ném `MoneyDomainException(INVALID_REQUEST, "HISTORY_MAHJONG2 supports limit only")`, sau đó `SocketErrorMapper` trả `3999 INVALID_REQUEST`.
 
-### Response — cmd `4016`
+---
+
+### 13.2. Response — cmd `4016`
 
 ```json
 {
@@ -900,6 +1176,17 @@ Nếu gửi `page` hoặc `size` sẽ lỗi.
         "spinId": "SPIN_abc123",
         "roundId": "RND_MW2_SPIN_abc123",
         "roomId": 1,
+        "animationReels": [],
+        "animationMeta": {
+          "mathLayout": [4, 5, 5, 5, 4],
+          "displayLayout": [6, 5, 5, 5, 6],
+          "displayOnlyPositions": [
+            { "col": 0, "row": 0 },
+            { "col": 0, "row": 5 },
+            { "col": 4, "row": 0 },
+            { "col": 4, "row": 5 }
+          ]
+        },
         "cascadeSteps": [],
         "totalWin": 45,
         "seamless": {
@@ -913,37 +1200,7 @@ Nếu gửi `page` hoặc `size` sẽ lỗi.
 }
 ```
 
-### Giải thích field
-
-| Field            | Ý nghĩa                               |
-| ---------------- | ------------------------------------- |
-| `cmd`            | `4016`                                |
-| `limit`          | Limit backend dùng sau khi clamp 1–50 |
-| `pagination`     | Luôn `"limit"`                        |
-| `items`          | Danh sách lịch sử spin                |
-| `items[].result` | Snapshot `ResultMahjong2Response` đã lưu |
-
----
-
-## 13. UNSUBSCRIBE_MAHJONG2 — cmd `4004`
-
-### Request
-
-```json
-{
-  "cmd": 4004,
-  "sessionToken": "player-token"
-}
-```
-
-### Response
-
-```json
-{
-  "cmd": 4009,
-  "subscribed": false
-}
-```
+`items[].result` là snapshot `ResultMahjong2Response` từ result store hoặc từ history summary fallback. Nếu result store trả full response, result có thể bao gồm `animationReels` / `animationMeta`. Nếu fallback từ `Mw2SpinHistory.resultSummaryJson`, result chỉ có summary fields do `SpinHistoryService.writeSummaryJson(...)` ghi, không có full `reels`.
 
 ---
 
@@ -971,7 +1228,7 @@ Nếu gửi `page` hoặc `size` sẽ lỗi.
 
 ## 15. AUTO_PLAY_MAHJONG2 — cmd `4006`
 
-Auto play hiện **không support** trong source.
+Auto play hiện không support.
 
 ### Request
 
@@ -984,15 +1241,18 @@ Auto play hiện **không support** trong source.
 
 ### Response
 
+`AutoPlayCommandHandler` trả:
+
 ```json
 {
   "cmd": 3999,
   "errorCode": 1001,
   "message": "AUTO_PLAY_UNSUPPORTED",
-  "balance": 0,
   "payoutStatus": "FAILED"
 }
 ```
+
+`balance` được set `null`, nên với non-null inclusion có thể không xuất hiện.
 
 ---
 
@@ -1035,14 +1295,13 @@ Mahjong2ErrorResponse(
 )
 ```
 
-Shape:
+Shape thường gặp:
 
 ```json
 {
   "cmd": 3999,
   "errorCode": 1001,
   "message": "INVALID_REQUEST",
-  "balance": 0,
   "payoutStatus": "FAILED"
 }
 ```
@@ -1057,157 +1316,36 @@ Nếu lỗi có liên quan spin pending/duplicate, có thể có thêm:
 }
 ```
 
+Lưu ý:
+
+```txt
+balance trong error response hiện thường là null.
+Do non_null config, FE không nên kỳ vọng error.balance luôn có mặt.
+FE không nên update balance từ cmd = 3999.
+```
+
 ---
 
 ## 18. Các lỗi FE có thể nhận
 
-| Trường hợp                       | Response sample                 |
-| -------------------------------- | ------------------------------- |
-| Thiếu `cmd`                      | `INVALID_REQUEST`               |
-| Command không có handler         | `UNKNOWN_COMMAND`               |
-| Token sai/hết hạn                | `INVALID_SESSION_TOKEN`         |
-| Thiếu `sessionToken`             | `INVALID_REQUEST`               |
-| Thiếu `clientRequestId` khi spin | `INVALID_REQUEST`               |
-| Thiếu `roomId` khi spin          | `INVALID_ROOM`                  |
-| Room không hợp lệ                | `INVALID_ROOM`                  |
-| Bet option không hợp lệ          | `INVALID_BET_OPTION`            |
-| FE gửi field bet bị cấm          | `CLIENT_BET_FIELDS_NOT_ALLOWED` |
-| Số dư không đủ                   | `INSUFFICIENT_BALANCE`          |
-| Spin trước đang pending bet      | `BET_PENDING`                   |
-| Settle đang pending              | `SETTLE_PENDING`                |
-| Jackpot đang pending             | `JACKPOT_PENDING`               |
-| Wallet lỗi cần review            | `FAILED_NEED_REVIEW`            |
-| Internal error                   | `INTERNAL_ERROR`                |
-
-### 18.1. Unknown command
-
-Request:
-
-```json
-{
-  "cmd": 9999,
-  "sessionToken": "player-token"
-}
-```
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1006,
-  "message": "UNKNOWN_COMMAND",
-  "balance": 0,
-  "payoutStatus": "FAILED"
-}
-```
-
-### 18.2. Invalid session token
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1001,
-  "message": "INVALID_SESSION_TOKEN",
-  "balance": 0,
-  "payoutStatus": "FAILED"
-}
-```
-
-### 18.3. Invalid room
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1001,
-  "message": "INVALID_ROOM",
-  "balance": 0,
-  "payoutStatus": "FAILED"
-}
-```
-
-### 18.4. Invalid bet option
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1001,
-  "message": "INVALID_BET_OPTION",
-  "balance": 0,
-  "payoutStatus": "FAILED"
-}
-```
-
-### 18.5. Insufficient balance
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1002,
-  "message": "INSUFFICIENT_BALANCE",
-  "balance": 0,
-  "payoutStatus": "FAILED"
-}
-```
-
-### 18.6. Bet pending
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1003,
-  "message": "BET_PENDING",
-  "balance": 0,
-  "payoutStatus": "BET_PENDING",
-  "clientRequestId": "spin-20260521-0006",
-  "spinId": "SPIN_pending_001",
-  "roundId": "RND_MW2_SPIN_pending_001"
-}
-```
-
-### 18.7. Settle pending
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1004,
-  "message": "SETTLE_PENDING",
-  "balance": 0,
-  "payoutStatus": "SETTLE_PENDING",
-  "clientRequestId": "spin-20260521-0007",
-  "spinId": "SPIN_settle_pending_001",
-  "roundId": "RND_MW2_SPIN_settle_pending_001"
-}
-```
-
-### 18.8. Failed need review
-
-Response:
-
-```json
-{
-  "cmd": 3999,
-  "errorCode": 1009,
-  "message": "FAILED_NEED_REVIEW",
-  "balance": 0,
-  "payoutStatus": "FAILED_NEED_REVIEW",
-  "clientRequestId": "spin-20260521-0008",
-  "spinId": "SPIN_review_001",
-  "roundId": "RND_MW2_SPIN_review_001"
-}
-```
+| Trường hợp | errorCode | message | payoutStatus |
+|---|---:|---|---|
+| Thiếu `cmd` | `1001` | `INVALID_REQUEST` | `FAILED` |
+| Command không có handler | `1006` | `UNKNOWN_COMMAND` | `FAILED` |
+| Token sai/hết hạn | `1001` | `INVALID_SESSION_TOKEN` | `FAILED` |
+| Thiếu `sessionToken` | `1001` | `INVALID_REQUEST` | `FAILED` |
+| Thiếu `clientRequestId` khi spin | `1001` | `INVALID_REQUEST` | `FAILED` |
+| Thiếu `roomId` khi spin | `1001` | `INVALID_ROOM` | `FAILED` |
+| Room không hợp lệ / disabled | `1001` | `INVALID_ROOM` hoặc `ROOM_DISABLED` | `FAILED` |
+| Bet option không hợp lệ | `1001` | `INVALID_BET_OPTION` | `FAILED` |
+| FE gửi field bet bị cấm | `1001` | `CLIENT_BET_FIELDS_NOT_ALLOWED` | `FAILED` |
+| Số dư không đủ | `1002` | `INSUFFICIENT_BALANCE` | `FAILED` |
+| Active spin đang tồn tại | `1003` | `ACTIVE_SPIN_ALREADY_EXISTS` | `BET_PENDING` |
+| Bet pending | `1003` | `BET_PENDING` | `BET_PENDING` |
+| Settle pending | `1004` | `SETTLE_PENDING` | `SETTLE_PENDING` |
+| Jackpot pending | `1005` | `JACKPOT_PENDING` | `JACKPOT_PENDING` |
+| Seamless timeout / 5xx / malformed | `1009` | Theo code lỗi | `FAILED_NEED_REVIEW` |
+| Internal error | `1099` | `INTERNAL_ERROR` | `FAILED_NEED_REVIEW` |
 
 ---
 
@@ -1218,10 +1356,13 @@ function handleSocketMessage(msg) {
   switch (msg.cmd) {
     case 4009:
       // subscribe / change room / unsubscribe info
+      // if msg.animationConfig exists, use it for visual layout metadata
       break;
 
     case 4001:
       // spin result or pending result
+      // render msg.reels as math board
+      // render msg.animationReels if present for animation board
       // check msg.seamless?.payoutStatus
       break;
 
@@ -1248,8 +1389,8 @@ function handleSocketMessage(msg) {
 Balance rule:
 
 ```txt
-Chỉ update balance từ cmd=4001 khi seamless.payoutStatus = SUCCESS.
-Không update balance từ cmd=3999 vì error.balance trong source luôn là 0.
+Chỉ update balance từ cmd = 4001 khi seamless.payoutStatus = SUCCESS.
+Không update balance từ cmd = 3999.
 ```
 
 Pending rule:
@@ -1262,7 +1403,8 @@ CANCEL_PENDING
 FAILED_NEED_REVIEW
 CREATED
 
-=> không xem là success
+=> không xem là success hoàn chỉnh
+=> không update balance
 => không spin tiếp bằng clientRequestId mới ngay
 => nên lock spin / hiển thị đang xử lý
 ```
@@ -1276,10 +1418,23 @@ INVALID_ROOM
 INVALID_BET_OPTION
 INVALID_REQUEST
 INVALID_SESSION_TOKEN
+UNKNOWN_COMMAND
 
 => request fail rõ ràng
 => FE có thể hiển thị lỗi
 => chỉ spin lại bằng clientRequestId mới sau khi user sửa lỗi / refresh session / nạp tiền
+```
+
+Animation rule:
+
+```txt
+reels = math truth [4,5,5,5,4]
+animationReels = visual-only [6,5,5,5,6]
+animationMeta = mapping metadata
+
+FE không được tính thắng từ animationReels.
+FE không được đếm scatter/freeSpin/jackpot từ animationReels.
+FE chỉ dùng animationReels để render animation.
 ```
 
 ---
@@ -1334,4 +1489,21 @@ socket.send(JSON.stringify({
   cmd: CMD.MINIMIZE,
   sessionToken: token
 }));
+```
+
+---
+
+## 21. Checklist FE cần nhớ
+
+```txt
+[ ] Lấy betOptionId từ 4009.betOptions, không tự tính bet.
+[ ] Không gửi totalBet/betSize/betLevel/baseBet/lineBet/betAmountMinor khi spin.
+[ ] Dùng 4009.symbols để map symbol code sang assetKey.
+[ ] Dùng reels cho kết quả thật.
+[ ] Dùng animationReels nếu có để render animation.
+[ ] Không dùng animationReels để tính thắng.
+[ ] Chỉ update balance từ 4001 SUCCESS.
+[ ] Không update balance từ 3999.
+[ ] Với pending payoutStatus, khóa spin và hiển thị đang xử lý.
+[ ] Không gửi page/size cho history; chỉ gửi limit.
 ```
