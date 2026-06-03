@@ -49,9 +49,7 @@ Big Win ≠ Jackpot
 # 2. Game có jackpot
 
 
-Nếu xét Mahjong Ways 2 gốc, Jackpot không phải feature bắt buộc của core gameplay.
-
-Tuy nhiên bản game hiện tại đang được thiết kế thêm **Platform Jackpot** ở tầng hệ thống/economy. Jackpot này không phải là “ways win” hay “Big Win”, mà là một hũ thưởng riêng của platform.
+Game hiện tại đang được thiết kế thêm **Platform Jackpot** ở tầng hệ thống/economy. Jackpot này không phải là “ways win” hay “Big Win”, mà là một hũ thưởng riêng của platform.
 
 Nói cách khác:
 
