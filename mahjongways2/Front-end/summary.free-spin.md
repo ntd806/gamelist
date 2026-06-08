@@ -1,103 +1,433 @@
-
----
-
-## 1. Các field mới trong `bet`
-
-Áp dụng cho response `cmd=4001` và history detail nếu có object `bet`.
+## Response `cmd=4020` — Free Spin Summary
 
 ```json
-"bet": {
-  "totalBet": 450,
-  "chargedAmount": 0,
-  "paid": false,
+{
+  "cmd": 4020,
+  "sessionId": "SPIN_TRIGGER_abc123",
+  "triggerSpinId": "SPIN_TRIGGER_abc123",
 
+  "status": "COMPLETED",
+  "mode": "FREE_SPIN",
+
+  "totalAwarded": 10,
+  "totalPlayed": 10,
+  "remaining": 0,
+
+  "lockedTotalBet": 450,
+  "chargedAmount": 0,
   "displayBet": 0,
   "actualBet": 0,
-  "lockedBet": 450,
-  "referenceBet": 450
+  "referenceBet": 450,
+
+  "totalWin": 1280,
+  "currency": "VND",
+
+  "startedAt": 1780477627000,
+  "completedAt": 1780477727000,
+
+  "items": [
+    {
+      "spinId": "SPIN_FS_01",
+      "roundId": "RND_MW2_SPIN_FS_01",
+      "displaySpinId": "MW2-000101",
+      "dailySpinCount": 101,
+      "createdAt": 1780477630000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 160,
+      "remainingBefore": 10,
+      "remainingAfter": 9,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_02",
+      "roundId": "RND_MW2_SPIN_FS_02",
+      "displaySpinId": "MW2-000102",
+      "dailySpinCount": 102,
+      "createdAt": 1780477640000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 0,
+      "remainingBefore": 9,
+      "remainingAfter": 8,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_03",
+      "roundId": "RND_MW2_SPIN_FS_03",
+      "displaySpinId": "MW2-000103",
+      "dailySpinCount": 103,
+      "createdAt": 1780477650000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 220,
+      "remainingBefore": 8,
+      "remainingAfter": 7,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_04",
+      "roundId": "RND_MW2_SPIN_FS_04",
+      "displaySpinId": "MW2-000104",
+      "dailySpinCount": 104,
+      "createdAt": 1780477660000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 100,
+      "remainingBefore": 7,
+      "remainingAfter": 6,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_05",
+      "roundId": "RND_MW2_SPIN_FS_05",
+      "displaySpinId": "MW2-000105",
+      "dailySpinCount": 105,
+      "createdAt": 1780477670000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 80,
+      "remainingBefore": 6,
+      "remainingAfter": 5,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_06",
+      "roundId": "RND_MW2_SPIN_FS_06",
+      "displaySpinId": "MW2-000106",
+      "dailySpinCount": 106,
+      "createdAt": 1780477680000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 0,
+      "remainingBefore": 5,
+      "remainingAfter": 4,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_07",
+      "roundId": "RND_MW2_SPIN_FS_07",
+      "displaySpinId": "MW2-000107",
+      "dailySpinCount": 107,
+      "createdAt": 1780477690000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 300,
+      "remainingBefore": 4,
+      "remainingAfter": 3,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_08",
+      "roundId": "RND_MW2_SPIN_FS_08",
+      "displaySpinId": "MW2-000108",
+      "dailySpinCount": 108,
+      "createdAt": 1780477700000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 120,
+      "remainingBefore": 3,
+      "remainingAfter": 2,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_09",
+      "roundId": "RND_MW2_SPIN_FS_09",
+      "displaySpinId": "MW2-000109",
+      "dailySpinCount": 109,
+      "createdAt": 1780477710000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 260,
+      "remainingBefore": 2,
+      "remainingAfter": 1,
+      "event": "CONSUMED"
+    },
+    {
+      "spinId": "SPIN_FS_10",
+      "roundId": "RND_MW2_SPIN_FS_10",
+      "displaySpinId": "MW2-000110",
+      "dailySpinCount": 110,
+      "createdAt": 1780477727000,
+
+      "totalBet": 450,
+      "lockedBet": 450,
+      "referenceBet": 450,
+
+      "chargedAmount": 0,
+      "displayBet": 0,
+      "actualBet": 0,
+      "paid": false,
+
+      "totalWin": 240,
+      "remainingBefore": 1,
+      "remainingAfter": 0,
+      "event": "COMPLETED"
+    }
+  ]
 }
 ```
 
-### `chargedAmount`
+## Giải thích cho frontend
 
-Số tiền **thực tế bị trừ ví** ở lượt quay đó.
+### `cmd`
 
-```text
-BASE spin     → chargedAmount = totalBet
-FREE_SPIN     → chargedAmount = 0
+```json
+"cmd": 4020
 ```
 
-Ví dụ Free Spin được tính theo bet 450 nhưng không trừ ví:
+Đây là gói **Free Spin Summary**. Frontend không cần gửi request riêng. Server tự gửi sau khi `4001` của lượt Free Spin cuối đã trả về.
+
+---
+
+### `sessionId`
+
+```json
+"sessionId": "SPIN_TRIGGER_abc123"
+```
+
+ID của phiên Free Spin. Dùng để group toàn bộ các lượt Free Spin trong cùng một phiên.
+
+---
+
+### `triggerSpinId`
+
+```json
+"triggerSpinId": "SPIN_TRIGGER_abc123"
+```
+
+ID của spin BASE đã trigger ra Free Spin. Thường sẽ giống `sessionId`.
+
+---
+
+### `status`
+
+```json
+"status": "COMPLETED"
+```
+
+Trạng thái phiên Free Spin.
+
+```text
+COMPLETED = đã quay hết toàn bộ lượt Free Spin
+ACTIVE    = vẫn còn lượt Free Spin
+```
+
+Gói `4020` trong flow này thường chỉ gửi khi `COMPLETED`.
+
+---
+
+### `mode`
+
+```json
+"mode": "FREE_SPIN"
+```
+
+Cho biết đây là summary của phiên Free Spin.
+
+---
+
+### `totalAwarded`
+
+```json
+"totalAwarded": 10
+```
+
+Tổng số lượt Free Spin được cấp.
+
+Ví dụ:
+
+```text
+3 Scatter → 10 lượt
+4 Scatter → 12 lượt
+5 Scatter → 14 lượt
+```
+
+Nếu trong Free Spin có retrigger, `totalAwarded` có thể lớn hơn số ban đầu.
+
+---
+
+### `totalPlayed`
+
+```json
+"totalPlayed": 10
+```
+
+Số lượt Free Spin đã quay.
+
+Khi phiên kết thúc bình thường:
+
+```text
+totalPlayed = totalAwarded
+```
+
+---
+
+### `remaining`
+
+```json
+"remaining": 0
+```
+
+Số lượt Free Spin còn lại.
+
+Khi server gửi `4020` sau lượt cuối:
+
+```text
+remaining = 0
+```
+
+---
+
+## Nhóm field Bet
+
+### `lockedTotalBet`
+
+```json
+"lockedTotalBet": 450
+```
+
+Mức cược được khóa để tính payout cho cả phiên Free Spin.
+
+Ví dụ người chơi quay BASE với bet `450` và trúng Free Spin, thì toàn bộ lượt Free Spin sẽ tính thưởng theo:
+
+```text
+lockedTotalBet = 450
+```
+
+---
+
+### `chargedAmount`
 
 ```json
 "chargedAmount": 0
 ```
 
+Tổng tiền thực tế bị trừ ví trong phiên Free Spin.
+
+Với Free Spin:
+
+```text
+chargedAmount = 0
+```
+
+vì người chơi không bị trừ tiền khi quay Free Spin.
+
 ---
 
 ### `displayBet`
 
-Field khuyến nghị frontend dùng để hiển thị ở cột **Bet**.
-
-```text
-Nếu UI hiểu “Bet” = tiền người chơi thật sự bị trừ
-→ dùng displayBet
+```json
+"displayBet": 0
 ```
 
-Ví dụ:
+Field frontend nên dùng nếu muốn hiển thị cột **Bet** theo nghĩa “tiền thật sự bị trừ”.
+
+Với Free Spin:
 
 ```text
-BASE spin     → displayBet = 450
-FREE_SPIN     → displayBet = 0
+displayBet = 0
 ```
 
 ---
 
 ### `actualBet`
 
-Alias của `displayBet`.
+```json
+"actualBet": 0
+```
 
-Ý nghĩa cũng là:
+Alias của `displayBet`. Nghĩa là tiền cược thực tế phát sinh trong phiên này.
+
+Với Free Spin:
 
 ```text
-Tiền cược thực tế phát sinh/trừ ví trong lượt đó.
-```
-
-Frontend có thể dùng `displayBet` là chính, `actualBet` để đọc cho rõ nghĩa.
-
----
-
-### `lockedBet`
-
-Mức cược được khóa để tính payout.
-
-Với Free Spin, dù người chơi không bị trừ tiền, game vẫn phải biết Free Spin đang tính thưởng theo mức cược nào.
-
-Ví dụ người chơi trigger Free Spin từ bet 450:
-
-```json
-"lockedBet": 450
-```
-
-Các lượt Free Spin sau đó vẫn có:
-
-```json
-"lockedBet": 450
+actualBet = 0
 ```
 
 ---
 
 ### `referenceBet`
 
-Alias của `lockedBet`.
-
-Ý nghĩa:
-
-```text
-Mức cược tham chiếu để tính tiền thắng.
+```json
+"referenceBet": 450
 ```
 
-Frontend có thể dùng để hiển thị tooltip/detail:
+Mức cược tham chiếu để tính payout.
+
+Có thể dùng để hiển thị tooltip/detail:
 
 ```text
 Reference Bet: 450
@@ -105,371 +435,226 @@ Reference Bet: 450
 
 ---
 
-### `paid`
+## Nhóm field thắng
 
-Cho biết lượt quay này có trừ tiền ví hay không.
-
-```text
-BASE spin     → paid = true
-FREE_SPIN     → paid = false
-```
-
----
-
-## 2. Các field mới trong history item `cmd=4016`
-
-Mỗi item history sẽ có thêm:
-
-```json
-{
-  "mode": "FREE_SPIN",
-  "isFreeSpin": true,
-
-  "totalBet": 450,
-  "lockedBet": 450,
-  "referenceBet": 450,
-
-  "chargedAmount": 0,
-  "displayBet": 0,
-  "actualBet": 0,
-  "paid": false
-}
-```
-
-### Frontend nên dùng như sau
-
-Nếu hiển thị cột **Bet**:
-
-```text
-Dùng displayBet hoặc chargedAmount
-```
-
-Nếu muốn hiển thị mức cược Free Spin được tính theo:
-
-```text
-Dùng lockedBet hoặc referenceBet
-```
-
-Ví dụ với Free Spin:
-
-```text
-Bet: 0
-Locked Bet: 450
-Win: 240
-```
-
-Không nên lấy `totalBet` để hiển thị tiền thực bị trừ ở Free Spin, vì `totalBet` là mức cược tham chiếu.
-
----
-
-## 3. Field mới trong `freeSpin`
-
-```json
-"freeSpin": {
-  "lockedTotalBet": 450,
-  "chargedAmount": 0,
-  "summary": { ... }
-}
-```
-
-### `freeSpin.lockedTotalBet`
-
-Mức cược khóa của toàn bộ phiên Free Spin.
-
-Ví dụ:
-
-```text
-Người chơi quay BASE bet 450 và trúng 10 Free Spin
-→ toàn bộ 10 lượt Free Spin dùng lockedTotalBet = 450 để tính thưởng
-```
-
----
-
-### `freeSpin.chargedAmount`
-
-Số tiền thực tế bị trừ khi quay Free Spin.
-
-Với Free Spin:
-
-```json
-"chargedAmount": 0
-```
-
----
-
-## 4. Object mới `freeSpin.summary`
-
-Object này chỉ xuất hiện khi phiên Free Spin kết thúc:
-
-```text
-freeSpin.event = "COMPLETED"
-remainingAfter = 0
-```
-
-Ví dụ:
-
-```json
-"freeSpin": {
-  "event": "COMPLETED",
-  "remainingAfter": 0,
-  "summary": {
-    "status": "COMPLETED",
-    "sessionId": "SPIN_TRIGGER_abc123",
-    "triggerSpinId": "SPIN_TRIGGER_abc123",
-
-    "totalAwarded": 10,
-    "totalPlayed": 10,
-    "remaining": 0,
-
-    "lockedTotalBet": 450,
-    "chargedAmount": 0,
-    "displayBet": 0,
-    "actualBet": 0,
-    "referenceBet": 450,
-
-    "totalWin": 1280,
-    "currency": "VND",
-
-    "startedAt": 1780477627000,
-    "completedAt": 1780477727000,
-
-    "items": []
-  }
-}
-```
-
-### `summary.status`
-
-Trạng thái phiên Free Spin.
-
-```text
-COMPLETED = đã quay hết phiên Free Spin
-ACTIVE    = vẫn còn lượt
-```
-
-Trong popup tổng kết, frontend chỉ cần xử lý khi:
-
-```text
-status = COMPLETED
-```
-
----
-
-### `summary.sessionId`
-
-ID của phiên Free Spin.
-
-Dùng để group các lượt Free Spin thuộc cùng một phiên.
-
----
-
-### `summary.triggerSpinId`
-
-Spin ID của lượt BASE đã trigger ra Free Spin.
-
-Thường bằng `sessionId`.
-
----
-
-### `summary.totalAwarded`
-
-Tổng số lượt Free Spin được cấp.
-
-Ví dụ:
-
-```text
-3 Scatter → totalAwarded = 10
-4 Scatter → totalAwarded = 12
-5 Scatter → totalAwarded = 14
-```
-
-Nếu có retrigger, số này có thể lớn hơn số ban đầu.
-
----
-
-### `summary.totalPlayed`
-
-Số lượt Free Spin đã quay trong phiên.
-
-Khi kết thúc bình thường:
-
-```text
-totalPlayed = totalAwarded
-```
-
-Ví dụ:
-
-```json
-"totalPlayed": 10
-```
-
----
-
-### `summary.remaining`
-
-Số lượt Free Spin còn lại.
-
-Khi popup tổng kết xuất hiện:
-
-```json
-"remaining": 0
-```
-
----
-
-### `summary.lockedTotalBet`
-
-Mức cược khóa để tính payout cho toàn bộ phiên Free Spin.
-
-Ví dụ:
-
-```json
-"lockedTotalBet": 450
-```
-
----
-
-### `summary.chargedAmount`
-
-Tổng tiền thực tế bị trừ trong phiên Free Spin.
-
-Với Free Spin:
-
-```json
-"chargedAmount": 0
-```
-
----
-
-### `summary.displayBet`
-
-Field frontend có thể dùng để hiển thị Bet trong popup.
-
-Với Free Spin:
-
-```json
-"displayBet": 0
-```
-
----
-
-### `summary.actualBet`
-
-Alias của `displayBet`.
-
-Ý nghĩa:
-
-```text
-Tiền thực tế bị trừ trong phiên Free Spin.
-```
-
----
-
-### `summary.referenceBet`
-
-Mức cược tham chiếu để tính thưởng.
-
-Ví dụ:
-
-```json
-"referenceBet": 450
-```
-
----
-
-### `summary.totalWin`
-
-Tổng tiền thắng trong toàn bộ phiên Free Spin.
-
-Lưu ý:
-
-```text
-Không cộng tiền thắng của spin BASE trigger.
-Chỉ cộng các lượt mode = FREE_SPIN.
-```
-
-Ví dụ:
+### `totalWin`
 
 ```json
 "totalWin": 1280
 ```
 
-Frontend dùng field này để hiển thị popup:
+Tổng tiền thắng của toàn bộ phiên Free Spin.
+
+Lưu ý quan trọng:
 
 ```text
-You won 1280
+totalWin của 4020 chỉ cộng các lượt mode = FREE_SPIN.
+Không cộng tiền thắng của spin BASE trigger.
+```
+
+Ví dụ trong response trên:
+
+```text
+160 + 0 + 220 + 100 + 80 + 0 + 300 + 120 + 260 + 240 = 1280
 ```
 
 ---
 
-### `summary.currency`
-
-Đơn vị tiền tệ.
-
-Ví dụ:
+### `currency`
 
 ```json
 "currency": "VND"
 ```
 
----
-
-### `summary.startedAt`
-
-Thời điểm bắt đầu phiên Free Spin, dạng timestamp milliseconds.
+Đơn vị tiền tệ.
 
 ---
 
-### `summary.completedAt`
+## Nhóm thời gian
 
-Thời điểm kết thúc phiên Free Spin, dạng timestamp milliseconds.
-
----
-
-### `summary.items`
-
-Danh sách từng lượt Free Spin trong phiên, nếu backend trả.
-
-Mỗi item gồm:
+### `startedAt`
 
 ```json
-{
-  "spinId": "SPIN_FS_01",
-  "roundId": "RND_MW2_SPIN_FS_01",
-  "displaySpinId": "MW2-000101",
-  "dailySpinCount": 101,
-  "createdAt": 1780477630000,
-  "totalWin": 160,
-  "remainingBefore": 10,
-  "remainingAfter": 9,
-  "event": "CONSUMED"
+"startedAt": 1780477627000
+```
+
+Timestamp milliseconds của thời điểm bắt đầu phiên Free Spin.
+
+---
+
+### `completedAt`
+
+```json
+"completedAt": 1780477727000
+```
+
+Timestamp milliseconds của thời điểm kết thúc phiên Free Spin.
+
+---
+
+## `items`
+
+```json
+"items": []
+```
+
+Danh sách chi tiết từng lượt Free Spin trong phiên.
+
+Frontend có thể dùng `items` nếu muốn hiển thị bảng chi tiết trong popup/history.
+
+Mỗi item là một lượt Free Spin.
+
+---
+
+## Giải thích field trong `items`
+
+### `spinId`
+
+ID kỹ thuật của lượt spin.
+
+### `roundId`
+
+ID round tương ứng với lượt spin.
+
+### `displaySpinId`
+
+ID hiển thị cho người chơi.
+
+Ví dụ:
+
+```json
+"displaySpinId": "MW2-000110"
+```
+
+### `dailySpinCount`
+
+Số thứ tự spin trong ngày.
+
+### `createdAt`
+
+Thời điểm spin, timestamp milliseconds.
+
+### `totalBet`
+
+```json
+"totalBet": 450
+```
+
+Mức cược tham chiếu/locked bet để tính payout. Với Free Spin vẫn là `450`.
+
+Không dùng field này để hiển thị “tiền bị trừ” ở Free Spin.
+
+### `lockedBet`
+
+```json
+"lockedBet": 450
+```
+
+Mức cược khóa của lượt Free Spin này.
+
+### `referenceBet`
+
+```json
+"referenceBet": 450
+```
+
+Alias của `lockedBet`.
+
+### `chargedAmount`
+
+```json
+"chargedAmount": 0
+```
+
+Tiền thực tế bị trừ ví ở lượt này. Với Free Spin luôn là `0`.
+
+### `displayBet`
+
+```json
+"displayBet": 0
+```
+
+Field nên dùng cho cột Bet nếu frontend muốn hiển thị tiền thật sự bị trừ.
+
+### `actualBet`
+
+```json
+"actualBet": 0
+```
+
+Alias của `displayBet`.
+
+### `paid`
+
+```json
+"paid": false
+```
+
+Cho biết lượt này có trừ tiền ví không.
+
+Với Free Spin:
+
+```text
+paid = false
+```
+
+### `totalWin`
+
+Tiền thắng của riêng lượt Free Spin đó.
+
+### `remainingBefore`
+
+Số lượt Free Spin còn lại trước khi quay lượt này.
+
+### `remainingAfter`
+
+Số lượt Free Spin còn lại sau khi quay lượt này.
+
+### `event`
+
+Trạng thái của lượt Free Spin.
+
+```text
+CONSUMED   = đã tiêu thụ 1 lượt Free Spin, vẫn còn lượt
+RETRIGGERED = trúng thêm Free Spin trong lúc đang Free Spin
+COMPLETED  = lượt cuối, phiên Free Spin đã kết thúc
+```
+
+---
+
+## Rule frontend cần dùng
+
+Frontend nhận flow như sau:
+
+```text
+1. FE gửi cmd=4001.
+2. Server trả cmd=4001 kết quả lượt Free Spin cuối.
+3. Server tự push tiếp cmd=4020 summary.
+4. FE nhận 4020 thì mở popup tổng kết Free Spin.
+```
+
+Điều kiện mở popup:
+
+```js
+if (response.cmd === 4020 && response.status === "COMPLETED") {
+  showFreeSpinSummary(response)
 }
 ```
 
-Frontend chỉ cần dùng `items` nếu muốn hiển thị bảng chi tiết từng lượt Free Spin.
-
-Nếu chỉ làm popup tổng kết, có thể bỏ qua `items`.
-
----
-
-## 5. Rule frontend cần nhớ
+Rule hiển thị Bet:
 
 ```text
-Nếu cần hiển thị tiền người chơi thật sự bị trừ:
-→ dùng chargedAmount / displayBet / actualBet
+Muốn hiển thị tiền thực bị trừ:
+→ dùng displayBet hoặc chargedAmount
 
-Nếu cần hiển thị mức cược dùng để tính thắng:
-→ dùng lockedBet / referenceBet / lockedTotalBet
-
-Nếu cần hiện popup tổng kết Free Spin:
-→ check freeSpin.event = "COMPLETED"
-→ lấy freeSpin.summary.totalWin
+Muốn hiển thị mức cược dùng để tính thưởng:
+→ dùng lockedTotalBet hoặc referenceBet
 ```
 
-Ví dụ Free Spin:
+Với Free Spin:
 
 ```text
 Bet hiển thị: 0
-Locked Bet: 450
-Total Free Spin Win: 1280
+Reference/Locked Bet: 450
+Total Win: 1280
 ```
