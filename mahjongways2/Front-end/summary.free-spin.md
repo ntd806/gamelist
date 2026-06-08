@@ -1,5 +1,5 @@
 ```text
-cmd=4001 có thể trả mode = BASE hoặc FREE_SPIN.
+cmd=4001 có thể trả mode = BASE hoặc FREE_SPIN khi ở mode=freespin.
 cmd=4020 chỉ trả cho FREE_SPIN summary, không có mode BASE.
 ```
 
