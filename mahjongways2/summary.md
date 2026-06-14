@@ -1,6 +1,6 @@
 ## Báo cáo tổng hợp từ dữ liệu thật
 
-Mình đã đọc trực tiếp 3 file `time-001.json`, `time-002.json`, `time-003.json`. **Kết quả: cả 3 file có nội dung giống hệt nhau**, cùng SHA-256: `c8e735c1b121fc4daa84f015a6b4dc7c7108d6995a5163cff8ce3d0cf733f4bc`. Vì vậy báo cáo dưới đây tổng hợp trên **1 bộ dữ liệu duy nhất**, không nhân 3 lần.   
+3 file `time-001.json`, `time-002.json`, `time-003.json`. **Kết quả: cả 3 file có nội dung giống hệt nhau**, cùng SHA-256: `c8e735c1b121fc4daa84f015a6b4dc7c7108d6995a5163cff8ce3d0cf733f4bc`. Vì vậy báo cáo dưới đây tổng hợp trên **1 bộ dữ liệu duy nhất**, không nhân 3 lần.   
 
 ---
 
