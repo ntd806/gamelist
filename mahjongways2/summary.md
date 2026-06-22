@@ -1,228 +1,314 @@
-## Báo cáo tổng hợp từ dữ liệu thật
+# Báo cáo tổng quan kết quả RTP — Mahjong Ways 2
 
-3 file `time-001.json`, `time-002.json`, `time-003.json`. **Kết quả: cả 3 file có nội dung giống hệt nhau**, cùng SHA-256: `c8e735c1b121fc4daa84f015a6b4dc7c7108d6995a5163cff8ce3d0cf733f4bc`. Vì vậy báo cáo dưới đây tổng hợp trên **1 bộ dữ liệu duy nhất**, không nhân 3 lần.   
+## 1. Thông tin phiên test
+
+Phiên test RTP được thực hiện cho game `MAHJONG_WAYS_2` với cấu hình:
+
+* Room: `1`
+* Bet option: `R1_BS_250_BL_9`
+* Seed: `123456`
+* Paid spins: `10,000`
+* Total rounds: `10,000`
+* Base rounds: `10,000`
+* Free Spin rounds: `0`
+
+Kết quả tổng quan:
+
+* Total Charged Bet: `4,500,000`
+* Total Win / Total Prize Paid: `3,732,435`
+* RTP: `82.943%`
+* House Edge: `17.057%`
+* Hit Rate: `34.63%`
+* Report status: `valid = true`
+* Invariant failures: `0`
+
+Kết quả này cho thấy phiên test đã chạy đủ số lượt paid spin, không phát sinh lỗi invariant trong quá trình tính toán RTP và kế toán.
 
 ---
 
-# 1. Thông tin mô phỏng
+## 2. Tổng quan kế toán dòng tiền
 
-| Chỉ tiêu         |                                                            Giá trị |
-| ---------------- | -----------------------------------------------------------------: |
-| Game             |                                                   `MAHJONG_WAYS_2` |
-| Config version   | `9b23e712399b8f2254352d323425d6bf349778f51bb5b2acb0afab650d6c6851` |
-| Room ID          |                                                                `1` |
-| Bet option       |                                                   `R1_BS_250_BL_9` |
-| Seed             |                                                           `123456` |
-| Paid spins       |                                                        `1,000,000` |
-| Total rounds     |                                                        `1,000,000` |
-| Base rounds      |                                                        `1,000,000` |
-| Free spin rounds |                                                                `0` |
-
-**Kết luận nguồn dữ liệu:** mô phỏng chỉ có **BASE round**, không phát sinh free spin round.
-
----
-
-# 2. Kết quả RTP và House Edge
-
-| Chỉ tiêu                     |                       Giá trị |
-| ---------------------------- | ----------------------------: |
-| Total charged bet            |                 `450,000,000` |
-| Total win / total prize paid |               `403,332,905.5` |
-| RTP                          | `0.89629535` = **89.629535%** |
-| House edge                   | `0.10370465` = **10.370465%** |
-| House return                 |                `46,667,094.5` |
-| House return rate            |                **10.370465%** |
-| Avg win per paid spin        |                 `403.3329055` |
-| Bet trung bình mỗi paid spin |                         `450` |
-
-Kiểm tra công thức từ dữ liệu:
+Tổng tiền người chơi bị charge trong 10,000 paid spins là:
 
 ```text
-House return = Total charged bet - Total prize paid
-             = 450,000,000 - 403,332,905.5
-             = 46,667,094.5
+Total Charged Bet = 4,500,000
 ```
 
-Kết quả này **khớp đúng** với trường `houseReturn`.
+Khoản này được phân bổ thành các phần:
 
----
+| Hạng mục                |   Giá trị |
+| ----------------------- | --------: |
+| Total Charged Bet       | 4,500,000 |
+| Total Fee               |    90,000 |
+| Total Pot Contribution  |    40,000 |
+| Total Fund Contribution | 4,370,000 |
+| Total Prize Paid        | 3,732,435 |
+| House Return            |   767,565 |
 
-# 3. Tần suất thắng và phân vị tiền thắng
-
-| Chỉ tiêu           |                   Giá trị |
-| ------------------ | ------------------------: |
-| Hit rate           | `0.346872` = **34.6872%** |
-| Base hit rate      |              **34.6872%** |
-| Free spin hit rate |                       `0` |
-| Max win            |               `2,189,944` |
-| P95 win            |                   `1,800` |
-| P99 win            |                 `7,042.5` |
-
-Diễn giải đúng theo dữ liệu: trong 1,000,000 paid spins, tỷ lệ có thắng là **34.6872%**. Không có free spin nên không có hit rate từ free spin.
-
----
-
-# 4. Big win / Mega win
-
-| Loại         |    Count | Tỷ lệ trên paid spins |
-| ------------ | -------: | --------------------: |
-| Big win      | `14,032` |           **1.4032%** |
-| Mega win     |  `3,291` |           **0.3291%** |
-| Big mega win |  `1,188` |           **0.1188%** |
-
----
-
-# 5. Free spin
-
-| Chỉ tiêu                            |             Giá trị |
-| ----------------------------------- | ------------------: |
-| Free spin trigger count             |                 `0` |
-| Free spin trigger rate              |                 `0` |
-| Free spin frequency                 |               `N/A` |
-| Free spin retrigger count           |                 `0` |
-| Free spin retrigger rate            |                 `0` |
-| Free spin rounds source             | `BASE_TRIGGER_ONLY` |
-| Standalone free spin mode supported |             `false` |
-
-**Kết luận:** dữ liệu này không ghi nhận bất kỳ lần trigger free spin nào.
-
----
-
-# 6. Jackpot và fund/pot economy
-
-| Chỉ tiêu                        |        Giá trị |
-| ------------------------------- | -------------: |
-| Jackpot hit count               |            `8` |
-| Jackpot blocked by fund count   |          `493` |
-| Jackpot removed by safety count |            `0` |
-| Total jackpot prize paid        |   `13,326,388` |
-| Initial pot                     |    `1,200,000` |
-| Final pot                       |    `1,473,612` |
-| Pot tăng                        |      `273,612` |
-| Initial fund                    |    `2,400,000` |
-| Final fund                      | `49,393,482.5` |
-| Fund tăng                       | `46,993,482.5` |
-
-Tỷ trọng jackpot trong tổng prize paid:
+Công thức đối soát chính:
 
 ```text
-13,326,388 / 403,332,905.5 = 3.3040666%
+House Return = Total Charged Bet - Total Prize Paid
+             = 4,500,000 - 3,732,435
+             = 767,565
 ```
 
-Tức là jackpot chiếm khoảng **3.3041%** tổng tiền trả thưởng.
-
----
-
-# 7. Cơ cấu phí, pot, fund
-
-| Chỉ tiêu                |       Giá trị | Tỷ lệ trên total charged bet |
-| ----------------------- | ------------: | ---------------------------: |
-| Total fee               |   `9,000,000` |                  **2.0000%** |
-| Total pot contribution  |   `4,000,000` |                  **0.8889%** |
-| Total fund contribution | `437,000,000` |                 **97.1111%** |
-
-Tổng cộng:
+Tỷ lệ house return:
 
 ```text
-9,000,000 + 4,000,000 + 437,000,000 = 450,000,000
+House Return Rate = 767,565 / 4,500,000
+                  = 17.057%
 ```
 
-Khớp với `totalChargedBet`.
+Tỷ lệ này khớp với `houseEdge = 0.17057` trong report.
 
 ---
 
-# 8. Phân rã regular prize và jackpot prize
+## 3. Phân tích RTP và payout
 
-| Chỉ tiêu                          |         Giá trị |
-| --------------------------------- | --------------: |
-| Total regular prize before safety | `390,006,517.5` |
-| Total regular prize paid          | `390,006,517.5` |
-| Total jackpot prize paid          |    `13,326,388` |
-| Total prize paid                  | `403,332,905.5` |
-| Total fund cost                   | `390,006,517.5` |
-
-Tỷ trọng:
-
-| Loại prize         |         Giá trị | Tỷ trọng trong total prize paid |
-| ------------------ | --------------: | ------------------------------: |
-| Regular prize paid | `390,006,517.5` |                    **96.6959%** |
-| Jackpot prize paid |    `13,326,388` |                     **3.3041%** |
-
----
-
-# 9. Cascade step distribution
-
-| Cascade steps |     Count |        Tỷ lệ |
-| ------------: | --------: | -----------: |
-|             0 | `653,135` | **65.3135%** |
-|             1 | `249,751` | **24.9751%** |
-|             2 |  `70,643` |  **7.0643%** |
-|             3 |  `19,454` |  **1.9454%** |
-|             4 |   `5,230` |  **0.5230%** |
-|             5 |   `1,315` |  **0.1315%** |
-|             6 |     `354` |  **0.0354%** |
-|             7 |      `90` |  **0.0090%** |
-|             8 |      `21` |  **0.0021%** |
-|             9 |       `5` |  **0.0005%** |
-|            10 |       `1` |  **0.0001%** |
-|            11 |       `1` |  **0.0001%** |
-
-Tổng count cascade:
+Tổng tiền thắng đã trả cho người chơi:
 
 ```text
-653,135 + 249,751 + ... + 1 = 1,000,000
+Total Prize Paid = 3,732,435
 ```
 
-Khớp với `totalRounds`.
+Do không có jackpot được trả trong phiên test, toàn bộ prize paid đến từ regular prize:
 
----
+| Hạng mục                    |   Giá trị |
+| --------------------------- | --------: |
+| Regular Prize Before Safety | 3,732,435 |
+| Regular Prize Paid          | 3,732,435 |
+| Jackpot Prize Paid          |         0 |
+| Total Prize Paid            | 3,732,435 |
 
-# 10. Symbol win breakdown
-
-Sắp xếp theo `totalWin` giảm dần:
-
-| Symbol |    Count |      Total win | Avg win / hit | Tỷ trọng trong regular prize |
-| ------ | -------: | -------------: | ------------: | ---------------------------: |
-| ITEM_2 | `39,184` |   `99,183,150` |    `2,531.22` |                 **25.4312%** |
-| ITEM_3 | `50,874` |   `81,522,855` |    `1,602.45` |                 **20.9029%** |
-| ITEM_1 | `21,843` |   `66,393,900` |    `3,039.60` |                 **17.0238%** |
-| ITEM_4 | `80,333` | `57,999,487.5` |      `721.99` |                 **14.8714%** |
-| ITEM_5 | `78,123` |   `30,533,895` |      `390.84` |                  **7.8291%** |
-| ITEM_6 | `81,433` |   `25,367,355` |      `311.51` |                  **6.5043%** |
-| ITEM_7 | `75,004` |   `14,016,960` |      `186.88` |                  **3.5940%** |
-| ITEM_9 | `62,663` |  `7,513,807.5` |      `119.91` |                  **1.9266%** |
-| ITEM_8 | `63,364` |  `7,475,107.5` |      `117.97` |                  **1.9167%** |
-
-Tổng `symbolWinBreakdown.totalWin`:
+RTP được tính như sau:
 
 ```text
-390,006,517.5
+RTP = Total Prize Paid / Total Charged Bet
+    = 3,732,435 / 4,500,000
+    = 82.943%
 ```
 
-Khớp với `totalRegularPrizePaid`.
+Trong đó:
+
+| Thành phần RTP | Giá trị |
+| -------------- | ------: |
+| Regular RTP    | 82.943% |
+| Jackpot RTP    |      0% |
+| Total RTP      | 82.943% |
+
+Như vậy, toàn bộ RTP trong phiên test này đến từ regular prize. Jackpot không đóng góp vào RTP do không có jackpot hit.
 
 ---
 
-# 11. Invariant check
+## 4. Phân tích quỹ fund và pot
 
-Dữ liệu ghi nhận:
+Trạng thái quỹ tổng:
 
-| Chỉ tiêu            | Giá trị                            |
-| ------------------- | ---------------------------------- |
-| `checkedInvariants` | Có danh sách invariant đã kiểm tra |
-| `invariantFailures` | `[]`                               |
+| Hạng mục               |   Giá trị |
+| ---------------------- | --------: |
+| Initial Aggregate Fund | 2,400,000 |
+| Final Aggregate Fund   | 3,037,565 |
+| Fund Increase          |   637,565 |
 
-**Kết luận:** theo dữ liệu trong file, không có invariant nào bị fail.
+Trạng thái pot:
+
+| Hạng mục     |   Giá trị |
+| ------------ | --------: |
+| Initial Pot  | 1,200,000 |
+| Final Pot    | 1,240,000 |
+| Pot Increase |    40,000 |
+
+Đối soát house return:
+
+```text
+Fee + Pot Increase + Fund Increase
+= 90,000 + 40,000 + 637,565
+= 767,565
+```
+
+Giá trị này khớp với:
+
+```text
+House Return = 767,565
+```
+
+Điều này cho thấy dòng tiền kế toán đang cân bằng giữa charge, payout, fee, pot và fund.
 
 ---
 
-# 12. Kết luận ngắn gọn
+## 5. Phân tích theo bucket active
 
-* 3 file là **cùng một kết quả mô phỏng**, không phải 3 kết quả khác nhau.
-* Mô phỏng chạy **1,000,000 paid spins**, tổng cược **450,000,000**.
-* Tổng trả thưởng **403,332,905.5**, RTP thực tế **89.629535%**.
-* House edge / house return rate là **10.370465%**.
-* Không có free spin phát sinh: `freeSpinRounds = 0`, `freeSpinTriggerCount = 0`.
-* Jackpot hit **8 lần**, jackpot bị block do fund **493 lần**.
-* Symbol đóng góp regular prize cao nhất là **ITEM_2** với `99,183,150`, chiếm **25.4312%** regular prize.
-* Dữ liệu tự khai báo `invariantFailures = []`, tức là không ghi nhận lỗi invariant trong kết quả mô phỏng.
+Phiên test đang chạy trên bucket active:
+
+```text
+MAHJONG_WAYS_2:R1:BS250:VND
+```
+
+Các bucket khác không phát sinh contribution hoặc payout.
+
+Bucket active có số liệu:
+
+| Hạng mục             |   Giá trị |
+| -------------------- | --------: |
+| Initial Bucket Fund  |   600,000 |
+| Bucket Contributions | 4,370,000 |
+| Bucket Fund Costs    | 3,732,435 |
+| Final Bucket Fund    | 1,237,565 |
+
+Đối soát bucket active:
+
+```text
+Final Bucket Fund
+= Initial Bucket Fund + Bucket Contributions - Bucket Fund Costs
+= 600,000 + 4,370,000 - 3,732,435
+= 1,237,565
+```
+
+Kết quả này khớp với `finalBucketFunds` trong report.
+
+Không có cross-bucket borrow:
+
+```text
+crossBucketBorrowAttemptCount = 0
+aggregateMismatchBlockCount = 0
+bucketInvariantFailuresCount = 0
+```
+
+Điều này cho thấy phiên test không phát sinh lỗi mượn quỹ chéo bucket hoặc lệch aggregate fund.
+
+---
+
+## 6. Safety và blocked prize
+
+Trong phiên test này, hệ thống không block prize vì safety:
+
+| Hạng mục                        | Giá trị |
+| ------------------------------- | ------: |
+| Regular Prize Safety Zero Count |       0 |
+| Blocked Regular Prize Minor     |       0 |
+| Blocked RTP                     |       0 |
+| Jackpot Blocked By Fund Count   |       0 |
+| Jackpot Removed By Safety Count |       0 |
+
+Điều này có nghĩa là toàn bộ regular prize phát sinh đều được chi trả đầy đủ, không có khoản win nào bị đưa về 0 do không đủ fund hoặc do safety rule.
+
+---
+
+## 7. Free Spin
+
+Trong 10,000 paid spins, kết quả ghi nhận:
+
+| Chỉ số                    | Giá trị |
+| ------------------------- | ------: |
+| Free Spin Rounds          |       0 |
+| Free Spin Trigger Count   |       0 |
+| Free Spin Trigger Rate    |       0 |
+| Free Spin Retrigger Count |       0 |
+| Free Spin Frequency       |     N/A |
+
+Free Spin không phát sinh trong phiên test này. Về mặt kế toán, điều này có nghĩa:
+
+* Không có round Free Spin được chơi.
+* Không có payout nào đến từ Free Spin.
+* Không có charged bet từ Free Spin.
+* Toàn bộ RTP và payout trong phiên test đều đến từ paid BASE spins.
+
+Theo xác suất đã rà soát từ cấu hình hiện tại, Free Spin có tần suất trigger rất thấp. Với 10,000 spins, việc chưa xuất hiện Free Spin vẫn nằm trong vùng hợp lý. Ngay cả với 1,000,000 spins, số lần trigger kỳ vọng chỉ khoảng 1–2 lần và vẫn có khả năng không xuất hiện Free Spin.
+
+Vì vậy, `freeSpinRounds = 0` trong report này chưa phải dấu hiệu lỗi kế toán. Nó chỉ cho thấy sample hiện tại chưa phát sinh event Free Spin.
+
+---
+
+## 8. Jackpot
+
+Trong phiên test này:
+
+| Chỉ số                          | Giá trị |
+| ------------------------------- | ------: |
+| Jackpot Hit Count               |       0 |
+| Jackpot Prize Paid              |       0 |
+| Jackpot RTP                     |       0 |
+| Jackpot Blocked By Fund Count   |       0 |
+| Jackpot Removed By Safety Count |       0 |
+
+Jackpot không phát sinh nên không ảnh hưởng đến payout, RTP hoặc fund cost của phiên test.
+
+---
+
+## 9. Big win và phân phối win
+
+Các chỉ số win lớn:
+
+| Loại win     | Count |
+| ------------ | ----: |
+| Big Win      |   127 |
+| Mega Win     |    32 |
+| Big Mega Win |    12 |
+
+Các chỉ số payout:
+
+| Chỉ số                    |  Giá trị |
+| ------------------------- | -------: |
+| Max Win                   | 47,722.5 |
+| Average Win Per Paid Spin | 373.2435 |
+| P95 Win                   |    1,800 |
+| P99 Win                   |    6,795 |
+
+Hit rate:
+
+```text
+Hit Rate = 34.63%
+```
+
+Nghĩa là khoảng 34.63% paid spins có phát sinh win.
+
+---
+
+## 10. Nhận định sơ bộ
+
+Về mặt kế toán, report hiện tại đang cân bằng:
+
+```text
+Total Charged Bet = 4,500,000
+Total Prize Paid = 3,732,435
+House Return = 767,565
+House Return Rate = 17.057%
+RTP = 82.943%
+```
+
+Các dòng tiền fee, pot và fund đều đối soát được:
+
+```text
+Fee + Pot Increase + Fund Increase = House Return
+90,000 + 40,000 + 637,565 = 767,565
+```
+
+Bucket active cũng cân bằng:
+
+```text
+Initial Fund + Contribution - Payout = Final Fund
+600,000 + 4,370,000 - 3,732,435 = 1,237,565
+```
+
+Không ghi nhận lỗi invariant, không có blocked prize, không có jackpot payout, không có cross-bucket borrow.
+
+Free Spin bằng 0 trong phiên test này không làm sai kế toán, vì không phát sinh Free Spin thì toàn bộ charged bet, payout, RTP và house return đều được tính trên paid BASE spins.
+
+---
+
+## 11. Kết luận
+
+Kết quả RTP hiện tại hợp lệ về mặt kế toán.
+
+Các chỉ số chính đang khớp:
+
+* Total charged bet khớp với paid spin package.
+* Total prize paid khớp với regular prize paid.
+* RTP khớp với công thức payout / charged bet.
+* House return khớp với charged bet trừ prize paid.
+* Fee, pot increase và fund increase cộng lại khớp house return.
+* Bucket active cân bằng contribution và payout.
+* Không có invariant failure.
+
+Điểm cần lưu ý duy nhất là Free Spin chưa phát sinh trong sample 10,000 spins. Tuy nhiên, với xác suất trigger hiện tại, kết quả này vẫn nằm trong vùng hợp lý và chưa đủ căn cứ kết luận lỗi.
