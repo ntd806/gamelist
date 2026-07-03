@@ -1,4 +1,4 @@
-# Mahjong Ways 2 — Tài liệu kỹ thuật cho `cmd=4001`
+# `cmd=4001`
 
 ## 1. Mục đích
 
