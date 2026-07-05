@@ -358,3 +358,184 @@ Kết quả trong lịch sử là kết quả cuối cùng trong trường hợp
 | Bonus symbol         | Chưa xác nhận                          |
 | JP symbol trên reels | Chưa xác nhận                          |
 | Jackpot system       | Nếu có, là tầng system/economy riêng   |
+
+
+Dưới đây là phần **luật chơi + mô tả chi tiết** cho phần trong hình về **Biểu tượng Mạ Vàng / Golden Symbols** và **Số Nhân Cascade**.
+
+---
+
+# Luật Biểu Tượng Mạ Vàng
+
+## 1. Biểu tượng mạ vàng là gì?
+
+Trong mỗi lượt quay, một số biểu tượng thường có thể xuất hiện dưới dạng **biểu tượng mạ vàng**.
+
+Biểu tượng mạ vàng là phiên bản đặc biệt của các biểu tượng thường, dùng để tạo thêm cơ hội thắng trong các lượt cascade tiếp theo.
+
+Các biểu tượng có thể mạ vàng:
+
+```text
+ITEM_1, ITEM_2, ITEM_3, ITEM_4, ITEM_5,
+ITEM_6, ITEM_7, ITEM_8, ITEM_9
+```
+
+Các biểu tượng **không được mạ vàng**:
+
+```text
+WILD
+SCATTER
+```
+
+Nghĩa là **WILD và SCATTER vẫn có thể xuất hiện trên guồng quay**, nhưng **không bao giờ xuất hiện dưới dạng mạ vàng**.
+
+---
+
+## 2. Vị trí xuất hiện của biểu tượng mạ vàng
+
+Biểu tượng mạ vàng chỉ có thể xuất hiện ở các guồng giữa:
+
+```text
+Guồng 2, Guồng 3, Guồng 4
+```
+
+Nếu màn hình có 5 cột:
+
+```text
+Cột 1 | Cột 2 | Cột 3 | Cột 4 | Cột 5
+        Gold    Gold    Gold
+```
+
+Thì biểu tượng mạ vàng chỉ xuất hiện ở:
+
+```text
+Cột 2, Cột 3, Cột 4
+```
+
+Không xuất hiện ở:
+
+```text
+Cột 1 và Cột 5
+```
+
+---
+
+## 3. Điều kiện biến thành WILD
+
+Nếu một biểu tượng mạ vàng **tham gia vào tổ hợp thắng**, biểu tượng đó sẽ được chuyển thành **WILD** ở lượt cascade tiếp theo.
+
+Ví dụ:
+
+```text
+ITEM_5 mạ vàng nằm trong tổ hợp thắng
+=> Sau khi tính thưởng
+=> ITEM_5 mạ vàng biến thành WILD
+=> WILD này có thể giúp tạo thêm tổ hợp thắng mới
+```
+
+Nói đơn giản:
+
+```text
+Biểu tượng mạ vàng chỉ biến thành WILD nếu nó có góp phần tạo win.
+```
+
+Nếu biểu tượng mạ vàng **không nằm trong tổ hợp thắng**, nó không biến thành WILD.
+
+---
+
+## 4. Thứ tự xử lý trong một lượt thắng
+
+Khi có tổ hợp thắng, game xử lý theo thứ tự:
+
+```text
+1. Xác định các tổ hợp thắng.
+2. Tính tiền thắng theo paytable và số nhân hiện tại.
+3. Kiểm tra biểu tượng mạ vàng nào nằm trong tổ hợp thắng.
+4. Các biểu tượng mạ vàng thắng sẽ biến thành WILD.
+5. Các biểu tượng thắng khác bị loại bỏ khỏi màn hình.
+6. Biểu tượng phía trên rơi xuống để lấp chỗ trống.
+7. Biểu tượng mới được thêm vào.
+8. Game tiếp tục kiểm tra thắng ở cascade tiếp theo.
+```
+
+Điểm quan trọng:
+
+```text
+Biểu tượng mạ vàng thắng không bị xóa ngay như symbol thường.
+Nó biến thành WILD trước, rồi có thể tiếp tục tham gia các lượt thắng sau.
+```
+
+---
+
+# Luật Số Nhân Cascade
+
+## 1. Số nhân là gì?
+
+Mỗi khi người chơi thắng và tạo ra cascade, số tiền thắng sẽ được nhân với hệ số tương ứng.
+
+Trong chế độ thường, số nhân tăng theo thứ tự:
+
+```text
+Lượt thắng đầu tiên: x1
+Cascade thứ 2:       x2
+Cascade thứ 3:       x3
+Cascade thứ 4 trở đi: x5
+```
+
+---
+
+## 2. Ví dụ cách tính
+
+Giả sử người chơi có chuỗi thắng liên tục trong một lượt quay:
+
+```text
+Cascade 1: thắng 100, multiplier x1 => nhận 100
+Cascade 2: thắng 100, multiplier x2 => nhận 200
+Cascade 3: thắng 100, multiplier x3 => nhận 300
+Cascade 4: thắng 100, multiplier x5 => nhận 500
+```
+
+Tổng thắng:
+
+```text
+100 + 200 + 300 + 500 = 1,100
+```
+
+---
+
+## 3. Mối liên hệ giữa Golden Symbol và Multiplier
+
+Biểu tượng mạ vàng giúp tăng khả năng kéo dài cascade.
+
+Khi biểu tượng mạ vàng biến thành WILD, nó có thể tạo thêm tổ hợp thắng mới. Nếu tiếp tục thắng, multiplier cũng tăng lên.
+
+Ví dụ:
+
+```text
+Lượt đầu: ITEM_5 mạ vàng tạo win ở x1
+=> ITEM_5 mạ vàng biến thành WILD
+
+Cascade tiếp theo:
+WILD mới giúp tạo thêm win ở x2
+
+Cascade tiếp nữa:
+Nếu tiếp tục thắng, multiplier tăng lên x3
+```
+
+Vì vậy, Golden Symbol là cơ chế giúp game có cảm giác:
+
+```text
+thắng nối tiếp
+cascade kéo dài
+multiplier tăng dần
+cơ hội tạo win lớn hơn
+```
+
+---
+
+# Tóm tắt ngắn để đưa vào game rule
+
+**Biểu tượng Mạ Vàng:**
+Trong mỗi lượt quay, một số biểu tượng thường, ngoại trừ WILD và SCATTER, có thể xuất hiện dưới dạng mạ vàng trên guồng 2, 3 và 4. Nếu biểu tượng mạ vàng tham gia vào tổ hợp thắng, nó sẽ biến thành WILD trong lượt cascade tiếp theo. WILD này có thể tiếp tục tham gia tạo các tổ hợp thắng mới.
+
+**Số Nhân:**
+Khi có cascade liên tiếp, số nhân thắng sẽ tăng dần theo thứ tự `x1 → x2 → x3 → x5`. Từ cascade thứ tư trở đi, số nhân giữ ở mức `x5`.
